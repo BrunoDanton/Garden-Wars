@@ -1,14 +1,23 @@
 using UnityEngine;
 
 [RequireComponent(typeof(MeshRenderer))]
+
 public class NPC_Stats : MonoBehaviour
 {
     public float hp = 10;
-    [SerializeField] private float damage = 2;
+    public float damage = 2;
     private bool isDead = false;
     private float timeSinceDead = 5;
 
-    
+    [SerializeField] private GameObject lifeBar;
+    private LifeBarController lifeBarController;
+    void Start()
+    {
+        lifeBarController = lifeBar.GetComponent<LifeBarController>();
+        lifeBarController.ConstructLifeBar(transform.lossyScale.y, hp, GetComponent<NPC_Controller>().isEnemy);
+
+    }
+
 
     void Update()
     {
@@ -17,8 +26,8 @@ public class NPC_Stats : MonoBehaviour
             timeSinceDead -= Time.deltaTime;
             if (!isDead)
             {
-            isDead = true;
-            transform.GetComponent<BoxCollider>().enabled = false;
+                isDead = true;
+                transform.GetComponent<BoxCollider>().enabled = false;
             }
         }
 
@@ -33,7 +42,8 @@ public class NPC_Stats : MonoBehaviour
             if (other.transform.GetComponent<NPC_Controller>().isEnemy != GetComponent<NPC_Controller>().isEnemy)
             {
                 NPC_Stats otherStats = other.transform.GetComponent<NPC_Stats>();
-                otherStats.hp -= damage;
+                hp -= otherStats.damage;
+                lifeBarController.TakeDamage(otherStats.damage);
             }
         }
     }
