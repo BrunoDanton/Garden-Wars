@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(BoxCollider))]
@@ -9,12 +10,23 @@ public class NPC_Controller : MonoBehaviour
     public bool isEnemy = false;
     [SerializeField] private float speed = 5;
 
+    [Header("Times")]
+    [Tooltip("Nome da Layer usada para aliados. Precisa existir em Project Settings > Tags and Layers.")]
+    [SerializeField] private string allyLayerName = "NPC_Ally";
+    [Tooltip("Nome da Layer usada para inimigos. Precisa existir em Project Settings > Tags and Layers.")]
+    [SerializeField] private string enemyLayerName = "NPC_Enemy";
+
+    private static bool layersConfigured = false;
+
     [Header("Repulsão")]
     public float atkRepulsion = 5;
     [Tooltip("Reduz o quanto este NPC é empurrado. 1 = normal, >1 = mais resistente, <1 = mais frágil.")] [SerializeField] private float resistance = 1f;
     [Tooltip("Mapeia a escala do NPC (localScale.x) para um multiplicador de repulsão/knockback.")] [SerializeField] private AnimationCurve scaleRepulsionCurve = AnimationCurve.Linear(0, 1, 3, 3);
     [SerializeField] private float baseUpwardForce = 5f;
     [SerializeField] private float baseStunDuration = 0.3f;
+
+    [Header("Detecção de inimigos")]
+    [SerializeField] private float retargetInterval = 0.25f;
 
     private Rigidbody rb;
     private bool isGrounded = true;
@@ -31,6 +43,32 @@ public class NPC_Controller : MonoBehaviour
 
     private float stunTimer = 0f;
     private Coroutine colorCoroutine;
+
+    private Transform target = null;
+    private readonly List<NPC_Controller> enemiesInRange = new List<NPC_Controller>();
+    private float retargetTimer = 0f;
+
+    void Awake()
+    {
+        int allyLayer = LayerMask.NameToLayer(allyLayerName);
+        int enemyLayer = LayerMask.NameToLayer(enemyLayerName);
+
+        if (allyLayer == -1 || enemyLayer == -1)
+        {
+            Debug.LogError($"Layers '{allyLayerName}' e/ou '{enemyLayerName}' não existem. Crie-as em Project Settings > Tags and Layers.");
+            return;
+        }
+
+        gameObject.layer = isEnemy ? enemyLayer : allyLayer;
+
+        if (!layersConfigured)
+        {
+            Physics.IgnoreLayerCollision(allyLayer, allyLayer, true);
+            Physics.IgnoreLayerCollision(enemyLayer, enemyLayer, true);
+            Physics.IgnoreLayerCollision(allyLayer, enemyLayer, false);
+            layersConfigured = true;
+        }
+    }
 
     void Start()
     {
@@ -50,9 +88,19 @@ public class NPC_Controller : MonoBehaviour
             return;
         }
 
+        retargetTimer -= Time.deltaTime;
+        if (retargetTimer <= 0f)
+        {
+            retargetTimer = retargetInterval;
+            target = FindClosestEnemy();
+        }
+
         if (isGrounded)
         {
-            rb.linearVelocity = (isEnemy ? Vector3.left : Vector3.right) * speed;
+            if (target == null)
+                rb.linearVelocity = (isEnemy ? Vector3.left : Vector3.right) * speed;
+            else
+                rb.linearVelocity = (target.position - transform.position).normalized * speed;
         }
     }
 
@@ -64,6 +112,10 @@ public class NPC_Controller : MonoBehaviour
 
         NPC_Controller other = collision.transform.GetComponent<NPC_Controller>();
         if (other == null) return;
+
+        // Rede de segurança: mesmo que a Layer não esteja configurada corretamente,
+        // aliados nunca aplicam repulsão entre si.
+        if (other.isEnemy == isEnemy) return;
 
         Debug.Log("Colisao");
 
@@ -95,13 +147,50 @@ public class NPC_Controller : MonoBehaviour
         colorCoroutine = StartCoroutine(LerpColor(Color.red, collisionFeedBackDuration));
     }
 
-    /// <summary>
-    /// Transitions the material color to a target color and then back to the original color over a specified duration using Color.Lerp.
-    /// Evaluated via an Animation Curve to break the linear visual illusion.
-    /// </summary>
-    /// <param name="targetColor">The target color to transition to during the collision.</param>
-    /// <param name="duration">The total time the color transition should take.</param>
-    /// <returns>IEnumerator for Coroutine execution.</returns>
+    void OnTriggerEnter(Collider other)
+    {
+        if (!other.CompareTag("NPC")) return;
+
+        NPC_Controller otherNpc = other.GetComponent<NPC_Controller>();
+        if (otherNpc == null || otherNpc.isEnemy == isEnemy) return;
+
+        if (!enemiesInRange.Contains(otherNpc))
+            enemiesInRange.Add(otherNpc);
+    }
+
+    void OnTriggerExit(Collider other)
+    {
+        NPC_Controller otherNpc = other.GetComponent<NPC_Controller>();
+        if (otherNpc != null)
+            enemiesInRange.Remove(otherNpc);
+    }
+
+    private Transform FindClosestEnemy()
+    {
+        NPC_Controller closest = null;
+        float closestSqrDist = float.MaxValue;
+
+        for (int i = enemiesInRange.Count - 1; i >= 0; i--)
+        {
+            NPC_Controller candidate = enemiesInRange[i];
+
+            if (candidate == null)
+            {
+                enemiesInRange.RemoveAt(i);
+                continue;
+            }
+
+            float sqrDist = (candidate.transform.position - transform.position).sqrMagnitude;
+            if (sqrDist < closestSqrDist)
+            {
+                closestSqrDist = sqrDist;
+                closest = candidate;
+            }
+        }
+
+        return closest != null ? closest.transform : null;
+    }
+
     private IEnumerator LerpColor(Color targetColor, float duration)
     {
         float timeElapsed = 0f;

@@ -1,51 +1,26 @@
 using UnityEngine;
 
-[RequireComponent(typeof(MeshRenderer))]
-
-public class NPC_Stats : MonoBehaviour
+public class NPC_Stats : Unit_Stats
 {
-    public float hp = 10;
     public float damage = 2;
-    private bool isDead = false;
-    private float timeSinceDead = 5;
+    public float spawnCooldown = 1;
+    public float toSpawnResource;
 
-    [SerializeField] private GameObject lifeBar;
-    private LifeBarController lifeBarController;
-    void Start()
+    private NPC_Controller npcController;
+
+    protected override bool IsEnemy => npcController.isEnemy;
+
+    protected override void Start()
     {
-        lifeBarController = lifeBar.GetComponent<LifeBarController>();
-        lifeBarController.ConstructLifeBar(transform.lossyScale.y, hp, GetComponent<NPC_Controller>().isEnemy);
-
+        npcController = GetComponent<NPC_Controller>();
+        base.Start();
     }
 
-
-    void Update()
+    void OnCollisionEnter(Collision collision)
     {
-        if (hp <= 0)
+        if (IsHostileNpc(collision, out NPC_Stats attacker))
         {
-            timeSinceDead -= Time.deltaTime;
-            if (!isDead)
-            {
-                isDead = true;
-                transform.GetComponent<BoxCollider>().enabled = false;
-            }
-        }
-
-        if (timeSinceDead <= 0)
-            Destroy(gameObject);
-    }
-
-    void OnCollisionEnter(Collision other)
-    {
-        if (other.gameObject.CompareTag("NPC"))
-        {
-            if (other.transform.GetComponent<NPC_Controller>().isEnemy != GetComponent<NPC_Controller>().isEnemy)
-            {
-                NPC_Stats otherStats = other.transform.GetComponent<NPC_Stats>();
-                hp -= otherStats.damage;
-                lifeBarController.TakeDamage(otherStats.damage);
-            }
+            ReceiveDamageFrom(attacker);
         }
     }
 }
-

@@ -68,6 +68,10 @@ PrefabInstance:
       propertyPath: hp
       value: 10
       objectReference: {fileID: 0}
+    - target: {fileID: 4027159840092466005, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
+      propertyPath: toSpawnResource
+      value: 20
+      objectReference: {fileID: 0}
     - target: {fileID: 5468389999452270452, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: m_Layer
       value: 6
@@ -87,6 +91,14 @@ PrefabInstance:
     - target: {fileID: 8385881727131199245, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: atkRepulsion
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8385881727131199245, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
+      propertyPath: allyLayerName
+      value: Ally
+      objectReference: {fileID: 0}
+    - target: {fileID: 8385881727131199245, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
+      propertyPath: enemyLayerName
+      value: Enemy
       objectReference: {fileID: 0}
     - target: {fileID: 8385881727131199245, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: baseUpwardForce
