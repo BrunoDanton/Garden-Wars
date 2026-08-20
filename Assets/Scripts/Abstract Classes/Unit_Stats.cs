@@ -3,7 +3,7 @@ using UnityEngine;
 [RequireComponent(typeof(MeshRenderer))]
 public abstract class Unit_Stats : MonoBehaviour
 {
-    public float hp = 10;
+    public float hp = 10, maxHP = 10;
     [SerializeField] protected GameObject lifeBar;
 
     protected bool isDead = false;

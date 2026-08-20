@@ -16,17 +16,21 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 8940c8d70b71b044d84e9550bd978185, type: 2}
+    - target: {fileID: 1330619196217574239, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
+      propertyPath: barVerticalSpacing
+      value: 0.1
+      objectReference: {fileID: 0}
     - target: {fileID: 2011486742988748300, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: m_LocalScale.x
-      value: 1.25
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2011486742988748300, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: m_LocalScale.y
-      value: 2.5
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 2011486742988748300, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: m_LocalScale.z
-      value: 1.25
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2011486742988748300, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: m_LocalPosition.x
@@ -82,15 +86,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4027159840092466005, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: hp
-      value: 20
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 4027159840092466005, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: spawnCooldown
-      value: 4
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4027159840092466005, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: toSpawnResource
-      value: 50
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 5468389999452270452, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: m_Layer
@@ -106,7 +110,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8385881727131199245, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: speed
-      value: 5
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 8385881727131199245, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: isEnemy
@@ -114,11 +118,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8385881727131199245, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: resistance
-      value: 5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8385881727131199245, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: atkRepulsion
-      value: 7
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8385881727131199245, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: allyLayerName
@@ -130,7 +134,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8385881727131199245, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: baseUpwardForce
-      value: 1
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 8385881727131199245, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: flashCurve.m_Curve.Array.data[0].value

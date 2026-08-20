@@ -1,47 +1,144 @@
 using UnityEngine;
+using System.Collections.Generic;
 
+[RequireComponent(typeof(Tower_Stats))]
 public abstract class TroopSpawner : MonoBehaviour
 {
-    public GameObject troop;
-    public float resource;
-    public float resourceMultiplier;
+    [Tooltip("Tipos de tropa disponíveis para este spawner (até 6).")]
+    public List<TroopEntry> troops = new List<TroopEntry>();
 
-    private float troopCooldown;
-    private NPC_Stats troopStats;
+    public float resource;
+    public float maxResource = 100;
+    public float resourceMultiplier;
+    public int level = 1;
+
+    [Tooltip("Tempo mínimo entre upgrades consecutivos, para não disparar vários upgrades em sequência quando o recurso acumulado é grande.")]
+    [SerializeField] protected float minTimeBetweenUpgrades = 5f;
+
+    public float upgradeCooldown;
+    protected Tower_Stats tower_Stats;
+    protected readonly List<Transform> activeTroops = new List<Transform>();
+
+    /// <summary>Disparado só quando uma tropa é realmente spawnada. Envia o índice da tropa (na lista 'troops') e a duração do cooldown usado.</summary>
+    public event System.Action<int, float> OnTroopSpawned;
+
+    /// <summary>Disparado só quando a torre é realmente upada. Envia a duração do cooldown usado.</summary>
+    public event System.Action<float> OnTowerUpgraded;
 
     protected virtual void Start()
     {
-        troopStats = troop.GetComponent<NPC_Stats>();
+        tower_Stats = GetComponent<Tower_Stats>();
+
+        foreach (TroopEntry entry in troops)
+        {
+            entry.troopStats = entry.troopPrefab.GetComponent<NPC_Stats>();
+        }
     }
 
     protected virtual void Update()
     {
-        if (troopCooldown <= 0 && resource >= troopStats.toSpawnResource && ShouldSpawn())
+        for (int i = 0; i < troops.Count; i++)
         {
-            SpawnTroop();
+            TroopEntry entry = troops[i];
+
+            if (entry.cooldown <= 0)
+            {
+                if (entry.spawnsOnTimer && level >= entry.troopStats.unlockedAtLevel)
+                {
+                    SpawnTroop(i);
+                }
+                else if (resource >= entry.troopStats.toSpawnResource && ShouldSpawn(i) && level >= entry.troopStats.unlockedAtLevel)
+                {
+                    SpawnTroop(i);
+                }
+            }
+
+            if (entry.cooldown > 0)
+                entry.cooldown -= Time.deltaTime;
         }
 
-        if (troopCooldown > 0)
+        if (upgradeCooldown <= 0 && tower_Stats.toUpgradeResource <= resource && ShouldUpgrade())
         {
-            troopCooldown -= Time.deltaTime;
+            UpgradeTower();
         }
 
-        resource += Time.deltaTime * resourceMultiplier;
+        if (upgradeCooldown > 0)
+            upgradeCooldown -= Time.deltaTime;
+
+        if (resource <= maxResource)
+            resource += Time.deltaTime * resourceMultiplier;
     }
 
-    /// <summary>
-    /// Condição adicional (além de cooldown e recurso disponível) que decide se o troop deve
-    /// nascer neste frame. Implementada por cada spawner concreto (automático, por input, etc).
-    /// </summary>
-    protected abstract bool ShouldSpawn();
+    /// <summary>Deve retornar true no frame em que o jogador/IA pediu o spawn da tropa de índice 'troopIndex' (0 a troops.Count - 1).</summary>
+    protected abstract bool ShouldSpawn(int troopIndex);
+    protected abstract bool ShouldUpgrade();
 
-    private void SpawnTroop()
+    /// <summary>
+    /// Distância (em linha reta) da tropa viva mais próxima do ponto informado, entre as
+    /// instanciadas por este spawner (qualquer tipo). Descarta da lista qualquer referência já
+    /// destruída (tropa morta ou destruída por outro motivo). Retorna float.MaxValue se não houver nenhuma.
+    /// </summary>
+    public float ClosestTroopDistanceTo(Vector3 point)
     {
-        float offset = transform.lossyScale.z / 2 - troop.transform.lossyScale.z / 2;
+        float closestSqrDist = float.MaxValue;
+
+        for (int i = activeTroops.Count - 1; i >= 0; i--)
+        {
+            Transform troopTransform = activeTroops[i];
+
+            if (troopTransform == null)
+            {
+                activeTroops.RemoveAt(i);
+                continue;
+            }
+
+            float sqrDist = (troopTransform.position - point).sqrMagnitude;
+            if (sqrDist < closestSqrDist)
+                closestSqrDist = sqrDist;
+        }
+
+        return closestSqrDist == float.MaxValue ? float.MaxValue : Mathf.Sqrt(closestSqrDist);
+    }
+
+    private void SpawnTroop(int index)
+    {
+        TroopEntry entry = troops[index];
+        GameObject prefab = entry.troopPrefab;
+
+        float offset = transform.lossyScale.z / 2 - prefab.transform.lossyScale.z / 2;
         Vector3 position = transform.position + new Vector3(0, 0, Random.Range(-offset, offset));
 
-        Instantiate(troop, position, Quaternion.identity);
-        resource -= troopStats.toSpawnResource;
-        troopCooldown = troopStats.spawnCooldown;
+        GameObject spawned = Instantiate(prefab, position, Quaternion.identity);
+        activeTroops.Add(spawned.transform);
+
+        float cooldownDuration;
+
+        if (entry.spawnsOnTimer)
+        {
+            float variance = Random.Range(-entry.spawnIntervalVariance, entry.spawnIntervalVariance);
+            cooldownDuration = Mathf.Max(0.1f, entry.spawnInterval + variance);
+        }
+        else
+        {
+            resource -= entry.troopStats.toSpawnResource;
+            cooldownDuration = entry.troopStats.spawnCooldown;
+        }
+
+        entry.cooldown = cooldownDuration;
+
+        OnTroopSpawned?.Invoke(index, cooldownDuration);
+    }
+
+    private void UpgradeTower()
+    {
+        resourceMultiplier *= 2;
+        maxResource *= 1.5f;
+        resource -= tower_Stats.toUpgradeResource;
+        tower_Stats.toUpgradeResource *= 2;
+        upgradeCooldown = minTimeBetweenUpgrades;
+        StartCoroutine(tower_Stats.LerpColor(Color.yellow, 1f));
+        level++;
+
+        OnTowerUpgraded?.Invoke(minTimeBetweenUpgrades);
     }
 }

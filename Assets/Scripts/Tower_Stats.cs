@@ -5,6 +5,7 @@ public class Tower_Stats : Unit_Stats
 {
     public bool isEnemy;
     private float lastHitCooldown = 0;
+    public float toUpgradeResource = 100;
 
     private MeshRenderer meshRenderer;
     private Color materialColor;
@@ -53,7 +54,7 @@ public class Tower_Stats : Unit_Stats
         colorCoroutine = StartCoroutine(LerpColor(Color.red, collisionFeedBackDuration));
     }
 
-    private IEnumerator LerpColor(Color targetColor, float duration)
+    public IEnumerator LerpColor(Color targetColor, float duration)
     {
         float timeElapsed = 0f;
 

@@ -5,6 +5,7 @@ public class NPC_Stats : Unit_Stats
     public float damage = 2;
     public float spawnCooldown = 1;
     public float toSpawnResource;
+    public int unlockedAtLevel = 1;
 
     private NPC_Controller npcController;
 

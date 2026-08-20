@@ -14,6 +14,8 @@ public class LifeBarController : MonoBehaviour
 
     private bool isEnemyBar;
 
+    private Vector3 parentLossyScale = Vector3.one;
+
     private class BarSegment
     {
         public Transform background;
@@ -38,9 +40,11 @@ public class LifeBarController : MonoBehaviour
     {
         isEnemyBar = isEnemy;
 
+        parentLossyScale = transform.parent != null ? transform.parent.lossyScale : Vector3.one;
+
         transform.position += Vector3.up * (height / 2) + new Vector3(0, 0.5f, 0);
 
-        Vector3 baseScale = transform.localScale; // escala original, capturada ANTES de qualquer mutação
+        Vector3 baseScale = transform.localScale;
 
         int segmentCount = Mathf.Max(1, Mathf.CeilToInt(TotalHP / maxHpPerBar));
         float remainingHp = TotalHP;
@@ -72,9 +76,8 @@ public class LifeBarController : MonoBehaviour
 
     private void BuildSegment(Transform background, Transform fill, float capacity, Vector3 baseScale)
     {
-        // atribuição direta em vez de "+=" — cada segmento parte sempre da MESMA escala base,
-        // não importa o que o clone tenha herdado
-        background.localScale = baseScale + Vector3.right * (capacity / 10f);
+        Vector3 desiredWorldScale = baseScale + Vector3.right * (capacity / 10f);
+        background.localScale = SafeDivide(desiredWorldScale, parentLossyScale);
 
         Vector3 HP_GlobalScale = background.lossyScale + new Vector3(-0.15f, -0.15f, 0.15f);
         Vector3 HP_LocalScale = new(
@@ -97,6 +100,14 @@ public class LifeBarController : MonoBehaviour
             targetScale = HP_LocalScale,
             targetPosition = fill.localPosition
         });
+    }
+
+    private static Vector3 SafeDivide(Vector3 value, Vector3 divisor)
+    {
+        return new Vector3(
+            divisor.x != 0f ? value.x / divisor.x : value.x,
+            divisor.y != 0f ? value.y / divisor.y : value.y,
+            divisor.z != 0f ? value.z / divisor.z : value.z);
     }
 
     /// <summary>

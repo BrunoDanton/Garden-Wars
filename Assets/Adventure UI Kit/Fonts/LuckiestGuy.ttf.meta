@@ -1,0 +1,28 @@
+fileFormatVersion: 2
+guid: 197fd569ee06f8940aa9aaa4958aab85
+timeCreated: 1763473663
+licenseType: Store
+TrueTypeFontImporter:
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: Luckiest Guy
+  fontNames:
+  - Luckiest Guy
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 376222
+  packageName: Adventure UI Kit
+  packageVersion: 1.0.0
+  assetPath: Assets/Adventure UI Kit/Fonts/LuckiestGuy.ttf
+  uploadId: 906000

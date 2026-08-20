@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 329e86c148fab65448d2b8e9a0f936c6
+timeCreated: 1763571952
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 376222
+  packageName: Adventure UI Kit
+  packageVersion: 1.0.0
+  assetPath: Assets/Adventure UI Kit/Scenes/Demo_Buttons.unity
+  uploadId: 906000

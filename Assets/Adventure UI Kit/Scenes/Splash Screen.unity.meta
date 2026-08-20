@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: a1203aaf2f41ba94791e4d9a904c980f
+timeCreated: 1763471754
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 376222
+  packageName: Adventure UI Kit
+  packageVersion: 1.0.0
+  assetPath: Assets/Adventure UI Kit/Scenes/Splash Screen.unity
+  uploadId: 906000

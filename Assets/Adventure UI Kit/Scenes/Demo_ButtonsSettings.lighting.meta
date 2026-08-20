@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: e9379de059d7e5b4f9ac116836672544
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 4890085278179872738
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 376222
+  packageName: Adventure UI Kit
+  packageVersion: 1.0.0
+  assetPath: Assets/Adventure UI Kit/Scenes/Demo_ButtonsSettings.lighting
+  uploadId: 906000

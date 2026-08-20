@@ -485,6 +485,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   hp: 10
+  maxHP: 10
   lifeBar: {fileID: 2294893852045257835}
   damage: 2
   spawnCooldown: 1

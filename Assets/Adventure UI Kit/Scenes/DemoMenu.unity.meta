@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: c838df59446e7d14e8bbf57f156e6841
+timeCreated: 1763578682
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 376222
+  packageName: Adventure UI Kit
+  packageVersion: 1.0.0
+  assetPath: Assets/Adventure UI Kit/Scenes/DemoMenu.unity
+  uploadId: 906000
