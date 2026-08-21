@@ -80,5 +80,10 @@ public class NPC_Stats : Unit_Stats
         {
             Debug.LogWarning($"Layer '{deadLayerName}' não encontrada na Unity.");
         }
+
+        if (IsEnemy)
+        {
+            GameOverManager.RegisterEnemyDefeated();
+        }
     }
 }
