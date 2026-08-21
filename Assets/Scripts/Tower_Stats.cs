@@ -8,6 +8,7 @@ public class Tower_Stats : Unit_Stats
     public float toUpgradeResource = 100;
 
     private MeshRenderer meshRenderer;
+    [SerializeField] private string deadLayerName = "DeadNPC";
     private Color materialColor;
     private Coroutine colorCoroutine;
     [SerializeField] private float collisionFeedBackDuration = 1f;
@@ -30,17 +31,13 @@ public class Tower_Stats : Unit_Stats
             lastHitCooldown -= Time.deltaTime;
     }
 
-    void OnCollisionEnter(Collision collision) => TryTakeHit(collision);
-
-    void OnCollisionStay(Collision collision)
+    /// <summary>
+    /// Evaluates if the tower can take damage based on the cooldown timer.
+    /// </summary>
+    // Substitui os antigos métodos OnCollisionEnter e OnCollisionStay
+    public override void TryTakeHitFrom(NPC_Stats attacker)
     {
         if (lastHitCooldown <= 0)
-            TryTakeHit(collision);
-    }
-
-    private void TryTakeHit(Collision collision)
-    {
-        if (IsHostileNpc(collision, out NPC_Stats attacker))
         {
             ReceiveDamageFrom(attacker);
             lastHitCooldown = 1;
@@ -54,6 +51,9 @@ public class Tower_Stats : Unit_Stats
         colorCoroutine = StartCoroutine(LerpColor(Color.red, collisionFeedBackDuration));
     }
 
+    /// <summary>
+    /// Coroutine to visually indicate damage taken.
+    /// </summary>
     public IEnumerator LerpColor(Color targetColor, float duration)
     {
         float timeElapsed = 0f;
@@ -67,5 +67,22 @@ public class Tower_Stats : Unit_Stats
         }
 
         meshRenderer.material.color = materialColor;
+    }
+
+    protected override void OnDeath()
+    {
+        base.OnDeath();
+        
+        CoinManager.totalMoney += onDeathReward;
+        
+        int deadLayer = LayerMask.NameToLayer(deadLayerName);
+        if (deadLayer != -1)
+        {
+            gameObject.layer = deadLayer;
+        }
+        else
+        {
+            Debug.LogWarning($"Layer '{deadLayerName}' não encontrada na Unity.");
+        }
     }
 }

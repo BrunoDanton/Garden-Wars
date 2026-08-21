@@ -268,6 +268,7 @@ GameObject:
   - component: {fileID: 8385881727131199245}
   - component: {fileID: 4027159840092466005}
   - component: {fileID: 3771988016155380655}
+  - component: {fileID: -3860597053202417690}
   m_Layer: 0
   m_Name: NPC
   m_TagString: NPC
@@ -362,7 +363,7 @@ BoxCollider:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 256
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
@@ -441,12 +442,13 @@ MonoBehaviour:
     m_RotationOrder: 4
   baseUpwardForce: 5
   baseStunDuration: 0.3
+  knockbackDamping: 5
   retargetInterval: 0.25
-  groundCheck: {fileID: 7106748590100526751}
-  groundDistance: 0
-  groundMask:
-    serializedVersion: 2
-    m_Bits: 8
+  detectionRadius: 8
+  stepOffset: 0.4
+  slopeLimit: 45
+  gravity: -20
+  groundedStickVelocity: -2
   collisionFeedBackDuration: 1
   flashCurve:
     serializedVersion: 2
@@ -490,6 +492,9 @@ MonoBehaviour:
   damage: 2
   spawnCooldown: 1
   toSpawnResource: 30
+  unlockedAtLevel: 1
+  attackCooldown: 1
+  deadLayerName: DeadNPC
 --- !u!135 &3771988016155380655
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -510,4 +515,29 @@ SphereCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Radius: 3
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!143 &-3860597053202417690
+CharacterController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7581760511548397434}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 256
+  m_LayerOverridePriority: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Height: 1
+  m_Radius: 0.5
+  m_SlopeLimit: 45
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.08
+  m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}

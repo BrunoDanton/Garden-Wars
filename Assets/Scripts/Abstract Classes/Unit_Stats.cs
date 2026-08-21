@@ -9,10 +9,14 @@ public abstract class Unit_Stats : MonoBehaviour
     protected bool isDead = false;
     protected float timeSinceDead = 5f;
     protected LifeBarController lifeBarController;
+    public int onDeathReward;
 
     /// <summary>
-    /// A qual time esta unidade pertence. Cada subclasse decide de onde vem essa informação
-    /// (campo próprio, componente NPC_Controller, etc).
+    /// Indicates whether the unit is currently dead.
+    /// </summary>
+    public bool IsDead => isDead;
+    /// <summary>
+    /// Indicates which team this unit belongs to. Each subclass decides where this information comes from.
     /// </summary>
     protected abstract bool IsEnemy { get; }
 
@@ -30,7 +34,7 @@ public abstract class Unit_Stats : MonoBehaviour
             if (!isDead)
             {
                 isDead = true;
-                GetComponent<BoxCollider>().enabled = false;
+                OnDeath();
             }
         }
 
@@ -39,29 +43,30 @@ public abstract class Unit_Stats : MonoBehaviour
     }
 
     /// <summary>
-    /// Reduz HP, atualiza a barra de vida e dispara qualquer efeito extra da subclasse (flash, cooldown, etc).
+    /// Hook triggered once when the unit's HP reaches zero.
     /// </summary>
-    protected void ReceiveDamageFrom(NPC_Stats attacker)
+    protected virtual void OnDeath() { } // Changed: Método criado para injeção de comportamento de morte
+
+    /// <summary>
+    /// Reduces HP, updates the life bar, and triggers extra effects from the subclass.
+    /// </summary>
+    public void ReceiveDamageFrom(NPC_Stats attacker)
     {
         hp -= attacker.damage;
         lifeBarController.TakeDamage(attacker.damage);
         OnDamaged();
     }
 
-    /// <summary>Hook opcional para efeitos extras ao levar dano (ex: flash de cor).</summary>
-    protected virtual void OnDamaged() { }
-
-    /// <summary>Verifica se a colisão foi com um NPC inimigo válido e retorna suas stats.</summary>
-    protected bool IsHostileNpc(Collision collision, out NPC_Stats attackerStats)
+    /// <summary>
+    /// Attempts to take a hit from an attacker. Intended to be overridden for cooldown checks.
+    /// </summary>
+    public virtual void TryTakeHitFrom(NPC_Stats attacker)
     {
-        attackerStats = null;
-
-        if (!collision.gameObject.CompareTag("NPC")) return false;
-
-        NPC_Controller otherController = collision.transform.GetComponent<NPC_Controller>();
-        if (otherController == null || otherController.isEnemy == IsEnemy) return false;
-
-        attackerStats = collision.transform.GetComponent<NPC_Stats>();
-        return attackerStats != null;
+        ReceiveDamageFrom(attacker);
     }
+
+    /// <summary>
+    /// Optional hook for extra effects when taking damage.
+    /// </summary>
+    protected virtual void OnDamaged() { }
 }

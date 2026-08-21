@@ -1,20 +1,17 @@
 using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
 
-[RequireComponent(typeof(Rigidbody))]
-[RequireComponent(typeof(BoxCollider))]
-[RequireComponent(typeof(Material))]
+[RequireComponent(typeof(CharacterController))]
 public class NPC_Controller : MonoBehaviour
 {
     public bool isEnemy = false;
     [SerializeField] private float speed = 5;
 
-    [Header("Times")]
+    [Header("Layers")]
     [Tooltip("Nome da Layer usada para aliados. Precisa existir em Project Settings > Tags and Layers.")]
-    [SerializeField] private string allyLayerName = "NPC_Ally";
+    [SerializeField] private string allyLayerName = "Ally";
     [Tooltip("Nome da Layer usada para inimigos. Precisa existir em Project Settings > Tags and Layers.")]
-    [SerializeField] private string enemyLayerName = "NPC_Enemy";
+    [SerializeField] private string enemyLayerName = "Enemy";
 
     private static bool layersConfigured = false;
 
@@ -24,20 +21,27 @@ public class NPC_Controller : MonoBehaviour
     [Tooltip("Mapeia a escala do NPC (localScale.x) para um multiplicador de repulsão/knockback.")] [SerializeField] private AnimationCurve scaleRepulsionCurve = AnimationCurve.Linear(0, 1, 3, 3);
     [SerializeField] private float baseUpwardForce = 5f;
     [SerializeField] private float baseStunDuration = 0.3f;
+    [Tooltip("Velocidade com que o impulso de knockback é absorvido/desacelerado.")]
+    [SerializeField] private float knockbackDamping = 5f;
 
     [Header("Detecção de inimigos")]
     [SerializeField] private float retargetInterval = 0.25f;
+    [Tooltip("Raio usado para procurar inimigos próximos (substitui o antigo trigger).")]
+    [SerializeField] private float detectionRadius = 8f;
 
-    private Rigidbody rb;
-    private bool isGrounded = true;
-
-    [SerializeField] private Transform groundCheck;
-    [SerializeField] private float groundDistance = 0.5f;
-    [SerializeField] private LayerMask groundMask;
+    [Header("Terreno (CharacterController)")]
+    [Tooltip("Altura máxima de degrau que o NPC sobe automaticamente.")]
+    [SerializeField] private float stepOffset = 0.4f;
+    [Tooltip("Inclinação máxima de rampa que o NPC consegue subir, em graus.")]
+    [SerializeField] private float slopeLimit = 45f;
+    [SerializeField] private float gravity = -20f;
+    [Tooltip("Pequena velocidade negativa mantida enquanto encostado no chão, para o controller não 'flutuar'.")]
+    [SerializeField] private float groundedStickVelocity = -2f;
 
     [SerializeField] private float collisionFeedBackDuration = 1f;
     [SerializeField] private AnimationCurve flashCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
+    private CharacterController controller;
     private MeshRenderer meshRenderer;
     private Color materialColor;
 
@@ -45,8 +49,13 @@ public class NPC_Controller : MonoBehaviour
     private Coroutine colorCoroutine;
 
     private Transform target = null;
-    private readonly List<NPC_Controller> enemiesInRange = new List<NPC_Controller>();
+    private Unit_Stats targetStats = null;
     private float retargetTimer = 0f;
+
+    private float verticalVelocity = 0f;
+    private Vector3 knockbackVelocity = Vector3.zero;
+
+    private NPC_Stats myStats;
 
     void Awake()
     {
@@ -72,73 +81,119 @@ public class NPC_Controller : MonoBehaviour
 
     void Start()
     {
-        rb = GetComponent<Rigidbody>();
-        rb.freezeRotation = true;
+        controller = GetComponent<CharacterController>();
+        controller.stepOffset = stepOffset;
+        controller.slopeLimit = slopeLimit;
+
         meshRenderer = GetComponent<MeshRenderer>();
         materialColor = meshRenderer.material.color;
+
+        myStats = GetComponent<NPC_Stats>();
     }
 
     void Update()
     {
-        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+        bool grounded = controller.isGrounded;
 
-        if (stunTimer > 0)
+        if (grounded && verticalVelocity < 0f)
+            verticalVelocity = groundedStickVelocity;
+        else
+            verticalVelocity += gravity * Time.deltaTime;
+
+        knockbackVelocity = Vector3.Lerp(knockbackVelocity, Vector3.zero, knockbackDamping * Time.deltaTime);
+
+        Vector3 horizontalMotion = Vector3.zero;
+
+        if (myStats != null && myStats.IsDead)
+        {
+            horizontalMotion = Vector3.zero;
+        }
+        else if (stunTimer > 0f)
         {
             stunTimer -= Time.deltaTime;
-            return;
+        }
+        else
+        {
+            retargetTimer -= Time.deltaTime;
+            if (retargetTimer <= 0f)
+            {
+                retargetTimer = retargetInterval;
+                target = FindClosestEnemy();
+                targetStats = (target != null)? target.GetComponent<NPC_Stats>(): null;
+            }
+
+            Vector3 rawDirection = (target == null)
+                ? (isEnemy ? Vector3.left : Vector3.right)
+                : (target.position - transform.position);
+
+            rawDirection.y = 0f;
+            Vector3 moveDirection = rawDirection.sqrMagnitude > 0.0001f ? rawDirection.normalized : Vector3.zero;
+
+            horizontalMotion = moveDirection * speed;
         }
 
-        retargetTimer -= Time.deltaTime;
-        if (retargetTimer <= 0f)
+        if (target != null && targetStats.IsDead == true)
         {
-            retargetTimer = retargetInterval;
-            target = FindClosestEnemy();
+            target = null;
         }
 
-        if (isGrounded)
+        Vector3 motion = horizontalMotion + knockbackVelocity;
+        motion.y = verticalVelocity;
+
+        controller.Move(motion * Time.deltaTime);
+    }
+
+    void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        if (stunTimer > 0f) return;
+        if (myStats != null && myStats.IsDead) return;
+
+        Unit_Stats targetStats = hit.gameObject.GetComponent<Unit_Stats>();
+        if (targetStats != null)
         {
-            if (target == null)
-                rb.linearVelocity = (isEnemy ? Vector3.left : Vector3.right) * speed;
-            else
-                rb.linearVelocity = (target.position - transform.position).normalized * speed;
+            if (myStats != null)
+            {
+                bool targetIsEnemy = isEnemy;
+                NPC_Controller otherController = hit.gameObject.GetComponent<NPC_Controller>();
+                Tower_Stats towerStats = hit.gameObject.GetComponent<Tower_Stats>();
+
+                if (otherController != null) targetIsEnemy = otherController.isEnemy;
+                else if (towerStats != null) targetIsEnemy = towerStats.isEnemy;
+
+                if (targetIsEnemy != isEnemy && myStats.CanAttack())
+                {
+                    targetStats.TryTakeHitFrom(myStats);
+                    myStats.ResetAttackTimer();
+                }
+            }
         }
     }
 
-    void OnCollisionEnter(Collision collision)
+    /// <summary>
+    /// Computes and applies physics knockback and color flash dynamically based on the attacker stats.
+    /// </summary>
+    // Changed: Novo método público que recebe os efeitos físicos e visuais estritamente quando chamado externamente (pelo NPC_Stats)
+    public void ApplyHitReaction(NPC_Controller attacker)
     {
-        if (stunTimer > 0) return;
-
-        if (!collision.gameObject.CompareTag("NPC")) return;
-
-        NPC_Controller other = collision.transform.GetComponent<NPC_Controller>();
-        if (other == null) return;
-
-        // Rede de segurança: mesmo que a Layer não esteja configurada corretamente,
-        // aliados nunca aplicam repulsão entre si.
-        if (other.isEnemy == isEnemy) return;
-
-        Debug.Log("Colisao");
-
-        float mySize = transform.localScale.x;
-        float sizeMultiplier = Mathf.Max(scaleRepulsionCurve.Evaluate(mySize), 0f);
+        float attackerSize = attacker.transform.localScale.x;
+        float sizeMultiplier = Mathf.Max(scaleRepulsionCurve.Evaluate(attackerSize), 0f);
 
         float safeResistance = Mathf.Max(resistance, 0.01f);
 
-        float effectiveRepulsion = (other.atkRepulsion * sizeMultiplier) / safeResistance;
+        float effectiveRepulsion = (attacker.atkRepulsion * sizeMultiplier) / safeResistance;
         float effectiveUpward = baseUpwardForce * sizeMultiplier;
         float effectiveStun = baseStunDuration * sizeMultiplier;
 
         stunTimer = effectiveStun;
 
-        Vector3 diff = transform.position - collision.transform.position;
+        Vector3 diff = transform.position - attacker.transform.position;
         diff.y = 0f;
         Vector3 direction = diff.sqrMagnitude > 0.0001f
             ? diff.normalized
             : (isEnemy ? Vector3.left : Vector3.right);
 
-        Vector3 knockback = (direction * effectiveRepulsion) + (Vector3.up * effectiveUpward);
-
-        rb.AddForce(knockback, ForceMode.VelocityChange);
+        knockbackVelocity = direction * effectiveRepulsion;
+        verticalVelocity = effectiveUpward;
 
         if (colorCoroutine != null)
         {
@@ -147,38 +202,19 @@ public class NPC_Controller : MonoBehaviour
         colorCoroutine = StartCoroutine(LerpColor(Color.red, collisionFeedBackDuration));
     }
 
-    void OnTriggerEnter(Collider other)
-    {
-        if (!other.CompareTag("NPC")) return;
-
-        NPC_Controller otherNpc = other.GetComponent<NPC_Controller>();
-        if (otherNpc == null || otherNpc.isEnemy == isEnemy) return;
-
-        if (!enemiesInRange.Contains(otherNpc))
-            enemiesInRange.Add(otherNpc);
-    }
-
-    void OnTriggerExit(Collider other)
-    {
-        NPC_Controller otherNpc = other.GetComponent<NPC_Controller>();
-        if (otherNpc != null)
-            enemiesInRange.Remove(otherNpc);
-    }
-
     private Transform FindClosestEnemy()
     {
+        Collider[] hits = Physics.OverlapSphere(transform.position, detectionRadius);
+
         NPC_Controller closest = null;
         float closestSqrDist = float.MaxValue;
 
-        for (int i = enemiesInRange.Count - 1; i >= 0; i--)
+        foreach (Collider hitCollider in hits)
         {
-            NPC_Controller candidate = enemiesInRange[i];
+            if (!hitCollider.CompareTag("NPC")) continue;
 
-            if (candidate == null)
-            {
-                enemiesInRange.RemoveAt(i);
-                continue;
-            }
+            NPC_Controller candidate = hitCollider.GetComponent<NPC_Controller>();
+            if (candidate == null || candidate == this || candidate.isEnemy == isEnemy) continue;
 
             float sqrDist = (candidate.transform.position - transform.position).sqrMagnitude;
             if (sqrDist < closestSqrDist)
