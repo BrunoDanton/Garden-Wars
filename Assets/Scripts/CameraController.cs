@@ -1,6 +1,4 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
-
 
 public class CameraController : MonoBehaviour
 {
@@ -8,6 +6,7 @@ public class CameraController : MonoBehaviour
     [SerializeField] private float towerAbsDistanceToOrigin = 50;
     [SerializeField] private float cameraOffset = 10;
     private float maxAbsDistance;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -17,14 +16,14 @@ public class CameraController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if ((Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed) && transform.position.x >= -maxAbsDistance)
+        if (InputManager.Instance.MoveCameraLeftHeld && transform.position.x >= -maxAbsDistance)
         {
             Vector3 position = transform.position;
             position.x -= speed * Time.deltaTime;
             transform.position = position;
         }
-    
-        if ((Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed) && transform.position.x <= maxAbsDistance)
+
+        if (InputManager.Instance.MoveCameraRightHeld && transform.position.x <= maxAbsDistance)
         {
             Vector3 position = transform.position;
             position.x += speed * Time.deltaTime;
@@ -32,5 +31,3 @@ public class CameraController : MonoBehaviour
         }
     }
 }
-
-

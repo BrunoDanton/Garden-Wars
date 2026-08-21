@@ -1,0 +1,46 @@
+using UnityEngine;
+
+/// <summary>
+/// Atualiza a largura de uma barra de fill de acordo com a posição horizontal
+/// de um scroll (RectTransform arrastável), seguindo o mesmo padrão das
+/// barras de HP/dominação/recurso do CanvasManager: largura = larguraTotal * percentual.
+///
+/// Anexe uma instância deste script por barra (ex: uma para Volume Geral,
+/// outra para Volume da Música), apontando cada uma para seu próprio
+/// scrollHandle e barFill.
+/// </summary>
+public class OptionsScrollBar : MonoBehaviour
+{
+    [Header("Scroll")]
+    [Tooltip("RectTransform do 'manípulo' que o jogador arrasta horizontalmente.")]
+    [SerializeField] private RectTransform scrollHandle;
+
+    [Tooltip("Posição X mínima do scrollHandle (mais à esquerda).")]
+    [SerializeField] private float minX = -230f;
+
+    [Tooltip("Posição X máxima do scrollHandle (mais à direita).")]
+    [SerializeField] private float maxX = 230f;
+
+    [Header("Barra")]
+    [Tooltip("RectTransform da barra de fill que deve crescer/encolher.")]
+    [SerializeField] private RectTransform barFill;
+
+    private float barFullWidth;
+
+    void Start()
+    {
+        barFullWidth = barFill.sizeDelta.x;
+    }
+
+    void Update()
+    {
+        float percent = Mathf.InverseLerp(minX, maxX, scrollHandle.anchoredPosition.x);
+        barFill.sizeDelta = new Vector2(barFullWidth * percent, barFill.sizeDelta.y);
+    }
+
+    /// <summary>
+    /// Percentual atual (0 a 1) entre minX e maxX. Útil se algum outro
+    /// script (ex: um AudioManager) precisar ler o volume resultante.
+    /// </summary>
+    public float CurrentPercent => Mathf.InverseLerp(minX, maxX, scrollHandle.anchoredPosition.x);
+}
