@@ -3445,6 +3445,12 @@ MonoBehaviour:
     spawnIntervalVariance: 0
     troopStats: {fileID: 0}
     cooldown: 0
+  - troopPrefab: {fileID: 4874942522563684577, guid: e5ffb82ded7972344971a7e9992cb76b, type: 3}
+    spawnsOnTimer: 1
+    spawnInterval: 4
+    spawnIntervalVariance: 0
+    troopStats: {fileID: 0}
+    cooldown: 0
   resource: 100
   maxResource: 100
   resourceMultiplier: 2
