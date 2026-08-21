@@ -29,6 +29,18 @@ public class NPC_Controller : MonoBehaviour
     [Tooltip("Raio usado para procurar inimigos próximos (substitui o antigo trigger).")]
     [SerializeField] private float detectionRadius = 8f;
 
+    [Header("Ataque à distância")]
+    [Tooltip("Se marcado, esta tropa para a uma certa distância do alvo e atira projéteis, em vez de avançar até o contato corpo a corpo.")]
+    [SerializeField] private bool isRanged = false;
+    [Tooltip("Distância que a tropa mantém do alvo antes de parar e começar a atirar. Ignorado se 'isRanged' estiver desmarcado.")]
+    [SerializeField] private float attackRange = 6f;
+    [Tooltip("Prefab do projétil disparado por esta tropa. Precisa ter o componente Projectile.")]
+    [SerializeField] private GameObject projectilePrefab;
+    [Tooltip("Ponto de onde o projétil nasce. Se vazio, usa a posição da própria tropa.")]
+    [SerializeField] private Transform firePoint;
+    [Tooltip("Velocidade de voo do projétil.")]
+    [SerializeField] private float projectileSpeed = 15f;
+
     [Header("Terreno (CharacterController)")]
     [Tooltip("Altura máxima de degrau que o NPC sobe automaticamente.")]
     [SerializeField] private float stepOffset = 0.4f;
@@ -119,7 +131,16 @@ public class NPC_Controller : MonoBehaviour
             {
                 retargetTimer = retargetInterval;
                 target = FindClosestEnemy();
-                targetStats = (target != null)? target.GetComponent<NPC_Stats>(): null;
+                targetStats = (target != null) ? target.GetComponent<Unit_Stats>() : null;
+            }
+
+            // NOVO: se a tropa é ranged e já está a uma distância <= attackRange do alvo,
+            // ela para de andar (nunca recua) e tenta atirar.
+            bool inRangeToStop = false;
+            if (isRanged && target != null)
+            {
+                float distanceToTarget = Vector3.Distance(transform.position, target.position);
+                inRangeToStop = distanceToTarget <= attackRange;
             }
 
             Vector3 rawDirection = (target == null)
@@ -129,7 +150,12 @@ public class NPC_Controller : MonoBehaviour
             rawDirection.y = 0f;
             Vector3 moveDirection = rawDirection.sqrMagnitude > 0.0001f ? rawDirection.normalized : Vector3.zero;
 
-            horizontalMotion = moveDirection * speed;
+            horizontalMotion = inRangeToStop ? Vector3.zero : moveDirection * speed;
+
+            if (inRangeToStop)
+            {
+                TryRangedAttack();
+            }
         }
 
         if (target != null && targetStats.IsDead == true)
@@ -145,6 +171,7 @@ public class NPC_Controller : MonoBehaviour
 
     void OnControllerColliderHit(ControllerColliderHit hit)
     {
+        if (isRanged) return; // NOVO: tropas ranged nunca causam dano por contato, só por projétil
         if (stunTimer > 0f) return;
         if (myStats != null && myStats.IsDead) return;
 
@@ -170,9 +197,38 @@ public class NPC_Controller : MonoBehaviour
     }
 
     /// <summary>
+    /// Dispara um projétil em direção ao alvo atual, respeitando o cooldown de ataque
+    /// da tropa (mesmo cooldown usado pelo ataque corpo a corpo).
+    /// </summary>
+    // NOVO
+    private void TryRangedAttack()
+    {
+        if (myStats == null || !myStats.CanAttack() || projectilePrefab == null || target == null) return;
+
+        Vector3 direction = target.position - transform.position;
+        direction.y = 0f;
+
+        if (direction.sqrMagnitude < 0.0001f) return;
+
+        Vector3 spawnPosition = firePoint != null ? firePoint.position : transform.position;
+        GameObject projectileObj = Instantiate(projectilePrefab, spawnPosition, Quaternion.identity);
+
+        Projectile projectile = projectileObj.GetComponent<Projectile>();
+        if (projectile != null)
+        {
+            projectile.Launch(direction, projectileSpeed, myStats);
+        }
+        else
+        {
+            Debug.LogWarning("O projectilePrefab não possui o componente Projectile.");
+        }
+
+        myStats.ResetAttackTimer();
+    }
+
+    /// <summary>
     /// Computes and applies physics knockback and color flash dynamically based on the attacker stats.
     /// </summary>
-    // Changed: Novo método público que recebe os efeitos físicos e visuais estritamente quando chamado externamente (pelo NPC_Stats)
     public void ApplyHitReaction(NPC_Controller attacker)
     {
         float attackerSize = attacker.transform.localScale.x;
@@ -204,27 +260,49 @@ public class NPC_Controller : MonoBehaviour
 
     private Transform FindClosestEnemy()
     {
-        Collider[] hits = Physics.OverlapSphere(transform.position, detectionRadius);
+    Collider[] hits = Physics.OverlapSphere(transform.position, detectionRadius);
 
-        NPC_Controller closest = null;
-        float closestSqrDist = float.MaxValue;
+    Transform closest = null;
+    float closestSqrDist = float.MaxValue;
 
-        foreach (Collider hitCollider in hits)
+    foreach (Collider hitCollider in hits)
+    {
+        // 1. Garante que o alvo é uma unidade ou torre válida (ambos herdam de Unit_Stats)
+        Unit_Stats candidateStats = hitCollider.GetComponent<Unit_Stats>();
+        if (candidateStats == null) continue;
+
+        // 2. Descobre de quem é o alvo e se é inimigo (mesma lógica do Projectile.cs)
+        bool isTargetEnemy;
+        NPC_Controller candidateNPC = hitCollider.GetComponent<NPC_Controller>();
+        Tower_Stats candidateTower = hitCollider.GetComponent<Tower_Stats>();
+
+        if (candidateNPC != null)
         {
-            if (!hitCollider.CompareTag("NPC")) continue;
-
-            NPC_Controller candidate = hitCollider.GetComponent<NPC_Controller>();
-            if (candidate == null || candidate == this || candidate.isEnemy == isEnemy) continue;
-
-            float sqrDist = (candidate.transform.position - transform.position).sqrMagnitude;
-            if (sqrDist < closestSqrDist)
-            {
-                closestSqrDist = sqrDist;
-                closest = candidate;
-            }
+            if (candidateNPC == this) continue; // Ignora a si mesmo
+            isTargetEnemy = candidateNPC.isEnemy;
+        }
+        else if (candidateTower != null)
+        {
+            isTargetEnemy = candidateTower.isEnemy;
+        }
+        else
+        {
+            continue; // Não é NPC nem Torre (terreno, etc)
         }
 
-        return closest != null ? closest.transform : null;
+        // 3. Se for aliado (fogo amigo), ignora
+        if (isTargetEnemy == isEnemy) continue;
+
+        // 4. Calcula a distância para pegar o mais próximo
+        float sqrDist = (hitCollider.transform.position - transform.position).sqrMagnitude;
+        if (sqrDist < closestSqrDist)
+        {
+            closestSqrDist = sqrDist;
+            closest = hitCollider.transform;
+        }
+    }
+
+    return closest;
     }
 
     private IEnumerator LerpColor(Color targetColor, float duration)
