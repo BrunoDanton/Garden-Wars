@@ -13,8 +13,6 @@ public class NPC_Controller : MonoBehaviour
     [Tooltip("Nome da Layer usada para inimigos. Precisa existir em Project Settings > Tags and Layers.")]
     [SerializeField] private string enemyLayerName = "Enemy";
 
-    private static bool layersConfigured = false;
-
     [Header("Repulsão")]
     public float atkRepulsion = 5;
     [Tooltip("Reduz o quanto este NPC é empurrado. 1 = normal, >1 = mais resistente, <1 = mais frágil.")] [SerializeField] private float resistance = 1f;
@@ -62,6 +60,7 @@ public class NPC_Controller : MonoBehaviour
 
     private Transform target = null;
     private Unit_Stats targetStats = null;
+    private Collider targetCollider = null; // NOVO: usado para calcular distância/mira pela superfície real do collider, não pelo pivô
     private float retargetTimer = 0f;
 
     private float verticalVelocity = 0f;
@@ -82,13 +81,14 @@ public class NPC_Controller : MonoBehaviour
 
         gameObject.layer = isEnemy ? enemyLayer : allyLayer;
 
-        if (!layersConfigured)
-        {
-            Physics.IgnoreLayerCollision(allyLayer, allyLayer, true);
-            Physics.IgnoreLayerCollision(enemyLayer, enemyLayer, true);
-            Physics.IgnoreLayerCollision(allyLayer, enemyLayer, false);
-            layersConfigured = true;
-        }
+        // NOVO: sempre reconfigura (idempotente/barato) em vez de configurar só uma vez.
+        // A trava estática antiga podia "sobreviver" entre execuções do Play Mode se
+        // "Reload Domain" estiver desligado em Enter Play Mode Settings, mesmo com a
+        // matriz de colisão do motor de física sendo resetada a cada novo Play — fazendo
+        // essas regras nunca serem reaplicadas a partir da segunda execução em diante.
+        Physics.IgnoreLayerCollision(allyLayer, allyLayer, true);
+        Physics.IgnoreLayerCollision(enemyLayer, enemyLayer, true);
+        Physics.IgnoreLayerCollision(allyLayer, enemyLayer, false);
     }
 
     void Start()
@@ -132,20 +132,25 @@ public class NPC_Controller : MonoBehaviour
                 retargetTimer = retargetInterval;
                 target = FindClosestEnemy();
                 targetStats = (target != null) ? target.GetComponent<Unit_Stats>() : null;
+                targetCollider = (target != null) ? target.GetComponent<Collider>() : null; // NOVO
             }
 
-            // NOVO: se a tropa é ranged e já está a uma distância <= attackRange do alvo,
-            // ela para de andar (nunca recua) e tenta atirar.
+            // NOVO: calcula o ponto mais próximo do collider real do alvo (não o pivô).
+            // Isso é essencial pra alvos grandes como a torre, cujo pivô pode estar
+            // longe da superfície que a tropa realmente precisa alcançar.
+            Vector3 closestTargetPoint = target != null ? GetClosestPointOnTarget() : Vector3.zero;
+
             bool inRangeToStop = false;
             if (isRanged && target != null)
             {
-                float distanceToTarget = Vector3.Distance(transform.position, target.position);
-                inRangeToStop = distanceToTarget <= attackRange;
+                Vector3 flatDiff = closestTargetPoint - transform.position;
+                flatDiff.y = 0f;
+                inRangeToStop = flatDiff.magnitude <= attackRange;
             }
 
             Vector3 rawDirection = (target == null)
                 ? (isEnemy ? Vector3.left : Vector3.right)
-                : (target.position - transform.position);
+                : (closestTargetPoint - transform.position);
 
             rawDirection.y = 0f;
             Vector3 moveDirection = rawDirection.sqrMagnitude > 0.0001f ? rawDirection.normalized : Vector3.zero;
@@ -171,7 +176,7 @@ public class NPC_Controller : MonoBehaviour
 
     void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        if (isRanged) return; // NOVO: tropas ranged nunca causam dano por contato, só por projétil
+        if (isRanged) return; // tropas ranged nunca causam dano por contato, só por projétil
         if (stunTimer > 0f) return;
         if (myStats != null && myStats.IsDead) return;
 
@@ -197,20 +202,43 @@ public class NPC_Controller : MonoBehaviour
     }
 
     /// <summary>
+    /// Retorna o ponto mais próximo da superfície do collider do alvo em relação a esta tropa.
+    /// Cai de volta para o pivô (target.position) se o alvo não tiver um Collider acessível.
+    /// </summary>
+    // NOVO
+    private Vector3 GetClosestPointOnTarget()
+    {
+        if (targetCollider != null)
+        {
+            // IMPORTANTE: Collider.ClosestPoint() só funciona corretamente em colliders
+            // CONVEXOS (Box, Sphere, Capsule, ou Mesh Collider com "Convex" marcado).
+            // Se a Torre usa um Mesh Collider não-convexo (bem comum em modelos maiores/
+            // detalhados), aquele método falha silenciosamente e devolve valores errados.
+            // Bounds.ClosestPoint() usa a caixa delimitadora (AABB) do collider, o que
+            // funciona para QUALQUER tipo de collider, convexo ou não.
+            return targetCollider.bounds.ClosestPoint(transform.position);
+        }
+        return target.position;
+    }
+
+    /// <summary>
     /// Dispara um projétil em direção ao alvo atual, respeitando o cooldown de ataque
     /// da tropa (mesmo cooldown usado pelo ataque corpo a corpo).
     /// </summary>
-    // NOVO
     private void TryRangedAttack()
     {
         if (myStats == null || !myStats.CanAttack() || projectilePrefab == null || target == null) return;
 
-        Vector3 direction = target.position - transform.position;
-        direction.y = 0f;
+        Vector3 spawnPosition = firePoint != null ? firePoint.position : transform.position;
 
+        // NOVO: mira no centro real do collider do alvo (inclui altura), em vez de assumir
+        // que o alvo está sempre na mesma altura da tropa. Resolve o projétil "passando por
+        // baixo" de alvos grandes como a torre.
+        Vector3 aimPoint = targetCollider != null ? targetCollider.bounds.center : target.position;
+
+        Vector3 direction = aimPoint - spawnPosition;
         if (direction.sqrMagnitude < 0.0001f) return;
 
-        Vector3 spawnPosition = firePoint != null ? firePoint.position : transform.position;
         GameObject projectileObj = Instantiate(projectilePrefab, spawnPosition, Quaternion.identity);
 
         Projectile projectile = projectileObj.GetComponent<Projectile>();
@@ -260,49 +288,58 @@ public class NPC_Controller : MonoBehaviour
 
     private Transform FindClosestEnemy()
     {
-    Collider[] hits = Physics.OverlapSphere(transform.position, detectionRadius);
+        // NOVO: se attackRange for maior que detectionRadius (ex: ajustado no Inspector
+        // durante testes), a tropa nunca conseguiria detectar algo que ela teoricamente
+        // já poderia atacar. Isso garante consistência entre os dois valores.
+        float effectiveDetectionRadius = isRanged ? Mathf.Max(detectionRadius, attackRange) : detectionRadius;
+        Collider[] hits = Physics.OverlapSphere(transform.position, effectiveDetectionRadius);
 
-    Transform closest = null;
-    float closestSqrDist = float.MaxValue;
+        Transform closest = null;
+        float closestSqrDist = float.MaxValue;
 
-    foreach (Collider hitCollider in hits)
-    {
-        // 1. Garante que o alvo é uma unidade ou torre válida (ambos herdam de Unit_Stats)
-        Unit_Stats candidateStats = hitCollider.GetComponent<Unit_Stats>();
-        if (candidateStats == null) continue;
-
-        // 2. Descobre de quem é o alvo e se é inimigo (mesma lógica do Projectile.cs)
-        bool isTargetEnemy;
-        NPC_Controller candidateNPC = hitCollider.GetComponent<NPC_Controller>();
-        Tower_Stats candidateTower = hitCollider.GetComponent<Tower_Stats>();
-
-        if (candidateNPC != null)
+        foreach (Collider hitCollider in hits)
         {
-            if (candidateNPC == this) continue; // Ignora a si mesmo
-            isTargetEnemy = candidateNPC.isEnemy;
-        }
-        else if (candidateTower != null)
-        {
-            isTargetEnemy = candidateTower.isEnemy;
-        }
-        else
-        {
-            continue; // Não é NPC nem Torre (terreno, etc)
+            // 1. Garante que o alvo é uma unidade ou torre válida (ambos herdam de Unit_Stats)
+            Unit_Stats candidateStats = hitCollider.GetComponent<Unit_Stats>();
+            if (candidateStats == null) continue;
+
+            // 2. Descobre de quem é o alvo e se é inimigo (mesma lógica do Projectile.cs)
+            bool isTargetEnemy;
+            NPC_Controller candidateNPC = hitCollider.GetComponent<NPC_Controller>();
+            Tower_Stats candidateTower = hitCollider.GetComponent<Tower_Stats>();
+
+            if (candidateNPC != null)
+            {
+                if (candidateNPC == this) continue; // Ignora a si mesmo
+                isTargetEnemy = candidateNPC.isEnemy;
+            }
+            else if (candidateTower != null)
+            {
+                isTargetEnemy = candidateTower.isEnemy;
+            }
+            else
+            {
+                continue; // Não é NPC nem Torre (terreno, etc)
+            }
+
+            // 3. Se for aliado (fogo amigo), ignora
+            if (isTargetEnemy == isEnemy) continue;
+
+            // 4. NOVO: usa o ponto mais próximo do collider (não o pivô) para escolher
+            // o alvo realmente mais próximo. Crítico para objetos grandes como a torre,
+            // cujo pivô pode estar bem longe da superfície de contato real.
+            // Usa Bounds.ClosestPoint (funciona em qualquer tipo de collider) em vez de
+            // Collider.ClosestPoint (só funciona em colliders convexos).
+            Vector3 closestPoint = hitCollider.bounds.ClosestPoint(transform.position);
+            float sqrDist = (closestPoint - transform.position).sqrMagnitude;
+            if (sqrDist < closestSqrDist)
+            {
+                closestSqrDist = sqrDist;
+                closest = hitCollider.transform;
+            }
         }
 
-        // 3. Se for aliado (fogo amigo), ignora
-        if (isTargetEnemy == isEnemy) continue;
-
-        // 4. Calcula a distância para pegar o mais próximo
-        float sqrDist = (hitCollider.transform.position - transform.position).sqrMagnitude;
-        if (sqrDist < closestSqrDist)
-        {
-            closestSqrDist = sqrDist;
-            closest = hitCollider.transform;
-        }
-    }
-
-    return closest;
+        return closest;
     }
 
     private IEnumerator LerpColor(Color targetColor, float duration)

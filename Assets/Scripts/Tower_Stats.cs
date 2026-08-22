@@ -7,6 +7,12 @@ public class Tower_Stats : Unit_Stats
     private float lastHitCooldown = 0;
     public float toUpgradeResource = 100;
 
+    [Header("Layers")]
+    [Tooltip("Nome da Layer usada quando isEnemy = false. Precisa ser a mesma usada no NPC_Controller (allyLayerName).")]
+    [SerializeField] private string allyLayerName = "Ally";
+    [Tooltip("Nome da Layer usada quando isEnemy = true. Precisa ser a mesma usada no NPC_Controller (enemyLayerName).")]
+    [SerializeField] private string enemyLayerName = "Enemy";
+
     private MeshRenderer meshRenderer;
     [SerializeField] private string deadLayerName = "DeadNPC";
     private Color materialColor;
@@ -15,6 +21,34 @@ public class Tower_Stats : Unit_Stats
     [SerializeField] private AnimationCurve flashCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
     protected override bool IsEnemy => isEnemy;
+
+    /// <summary>
+    /// Coloca a torre na mesma layer do time dela (Ally/Enemy), igual às tropas.
+    /// Sem isso, a torre fica na layer "Default" e as regras de colisão que já
+    /// ignoram Ally-vs-Ally e Enemy-vs-Enemy nunca se aplicam a ela — resultado:
+    /// tropas do próprio time colidem fisicamente com a própria torre e podem
+    /// ficar travadas nela (especialmente tropas com collider grande, tipo tanques).
+    /// </summary>
+    private void Awake()
+    {
+        int allyLayer = LayerMask.NameToLayer(allyLayerName);
+        int enemyLayer = LayerMask.NameToLayer(enemyLayerName);
+
+        if (allyLayer == -1 || enemyLayer == -1)
+        {
+            Debug.LogError($"Layers '{allyLayerName}' e/ou '{enemyLayerName}' não existem. Crie-as em Project Settings > Tags and Layers.");
+            return;
+        }
+
+        gameObject.layer = isEnemy ? enemyLayer : allyLayer;
+
+        // NOVO: garante essas regras independentemente de alguma tropa já ter rodado
+        // Awake() antes (a Torre existe na cena desde o início, pode ser a primeira
+        // coisa a rodar). Chamada idempotente, sem problema em repetir.
+        Physics.IgnoreLayerCollision(allyLayer, allyLayer, true);
+        Physics.IgnoreLayerCollision(enemyLayer, enemyLayer, true);
+        Physics.IgnoreLayerCollision(allyLayer, enemyLayer, false);
+    }
 
     protected override void Start()
     {
@@ -38,10 +72,10 @@ public class Tower_Stats : Unit_Stats
     public override void TryTakeHitFrom(NPC_Stats attacker)
     {
         if (lastHitCooldown <= 0)
-        {
-            ReceiveDamageFrom(attacker);
+        { 
             lastHitCooldown = 1;
         }
+        ReceiveDamageFrom(attacker);
     }
 
     protected override void OnDamaged()

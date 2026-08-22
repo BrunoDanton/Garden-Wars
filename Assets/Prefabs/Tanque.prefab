@@ -22,23 +22,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2011486742988748300, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: m_LocalScale.x
-      value: 1.25
+      value: 1.4
       objectReference: {fileID: 0}
     - target: {fileID: 2011486742988748300, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: m_LocalScale.y
-      value: 2.5
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 2011486742988748300, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: m_LocalScale.z
-      value: 1.25
+      value: 1.4
       objectReference: {fileID: 0}
     - target: {fileID: 2011486742988748300, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -49
+      value: -49.8597
       objectReference: {fileID: 0}
     - target: {fileID: 2011486742988748300, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1
+      value: 0.6466
       objectReference: {fileID: 0}
     - target: {fileID: 2011486742988748300, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: m_LocalPosition.z
@@ -74,7 +74,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2011486742988748300, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: m_ConstrainProportionsScale
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2294893852045257835, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: m_Layer
@@ -83,6 +83,10 @@ PrefabInstance:
     - target: {fileID: 3549933724147763297, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: m_Layer
       value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 3771988016155380655, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
+      propertyPath: m_Radius
+      value: 0.7
       objectReference: {fileID: 0}
     - target: {fileID: 4027159840092466005, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: hp
@@ -98,7 +102,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4027159840092466005, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: spawnCooldown
-      value: 5
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 4027159840092466005, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: toSpawnResource
@@ -114,7 +118,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7581760511548397434, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: m_Name
-      value: Ally Variant 2
+      value: Tanque
       objectReference: {fileID: 0}
     - target: {fileID: 7581760511548397434, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: m_Layer
@@ -122,23 +126,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8385881727131199245, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: speed
-      value: 8
-      objectReference: {fileID: 0}
-    - target: {fileID: 8385881727131199245, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
-      propertyPath: isRanged
-      value: 1
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 8385881727131199245, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: resistance
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 8385881727131199245, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
-      propertyPath: attackRange
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 8385881727131199245, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: atkRepulsion
-      value: 5
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 8385881727131199245, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: allyLayerName
@@ -152,10 +148,6 @@ PrefabInstance:
       propertyPath: baseUpwardForce
       value: 0.5
       objectReference: {fileID: 0}
-    - target: {fileID: 8385881727131199245, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
-      propertyPath: projectilePrefab
-      value: 
-      objectReference: {fileID: 4874942522563684577, guid: 140d33fbaeb82ed49adfdd436a7dc958, type: 3}
     - target: {fileID: 8385881727131199245, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: collisionFeedBackDuration
       value: 1

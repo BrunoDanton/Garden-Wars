@@ -15,7 +15,7 @@ PrefabInstance:
     - target: {fileID: 697190522465094713, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 69543a0774a5c8241ae747edd774814d, type: 2}
+      objectReference: {fileID: 2100000, guid: 8940c8d70b71b044d84e9550bd978185, type: 2}
     - target: {fileID: 1330619196217574239, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: barVerticalSpacing
       value: 0.1
@@ -78,11 +78,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2294893852045257835, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: m_Layer
-      value: 6
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 3549933724147763297, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: m_Layer
-      value: 6
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 3771988016155380655, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
+      propertyPath: m_Radius
+      value: 0.7
       objectReference: {fileID: 0}
     - target: {fileID: 4027159840092466005, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: hp
@@ -95,6 +99,10 @@ PrefabInstance:
     - target: {fileID: 4027159840092466005, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: damage
       value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4027159840092466005, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
+      propertyPath: onDeathReward
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 4027159840092466005, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: spawnCooldown
@@ -110,19 +118,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5468389999452270452, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: m_Layer
-      value: 6
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 7581760511548397434, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: m_Name
-      value: Ally Variant 1
+      value: Enemy Variant 1
       objectReference: {fileID: 0}
     - target: {fileID: 7581760511548397434, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: m_Layer
-      value: 6
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 8385881727131199245, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: speed
       value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8385881727131199245, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
+      propertyPath: isEnemy
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8385881727131199245, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: resistance

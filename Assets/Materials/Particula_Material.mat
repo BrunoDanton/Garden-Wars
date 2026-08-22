@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Ally_Material
+  m_Name: Particula_Material
   m_Shader: {fileID: -6465566751694194690, guid: 53d1fb25f1a290c488df258b4c7c1f8d, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -152,7 +152,7 @@ Material:
     - _RotationScrollSpeed: 0.36
     - _RotationSpeed: 0.01
     - _RotationStrengh: 2
-    - _Smoothness: 0.5
+    - _Smoothness: 0.52
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
@@ -168,7 +168,7 @@ Material:
     - _ZWriteControl: 0
     m_Colors:
     - _BaseColor: {r: 0.14117646, g: 0.6509804, b: 0.2475335, a: 1}
-    - _Color: {r: 0.14117643, g: 0.6509804, b: 0.24753347, a: 1}
+    - _Color: {r: 0.05660379, g: 0.021154875, b: 0, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []

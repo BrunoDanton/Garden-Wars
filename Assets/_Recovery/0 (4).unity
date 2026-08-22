@@ -3457,12 +3457,6 @@ MonoBehaviour:
     spawnIntervalVariance: 0
     troopStats: {fileID: 0}
     cooldown: 0
-  - troopPrefab: {fileID: 4874942522563684577, guid: e1a7f11c2497eae47b21eb2ff9d2323d, type: 3}
-    spawnsOnTimer: 0
-    spawnInterval: 4
-    spawnIntervalVariance: 0
-    troopStats: {fileID: 0}
-    cooldown: 0
   resource: 100
   maxResource: 100
   resourceMultiplier: 2
@@ -4781,10 +4775,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player Tower
       objectReference: {fileID: 0}
-    - target: {fileID: 8722319684781269304, guid: 68daac4c9a2fdc840821aa08ea6d2219, type: 3}
-      propertyPath: m_Layer
-      value: 6
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -5247,7 +5237,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &699356730
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5266,9 +5256,9 @@ RectTransform:
   - {fileID: 1670097477}
   m_Father: {fileID: 2071417154}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 884.4, y: -54}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &699356731
