@@ -11,6 +11,7 @@ public abstract class TroopSpawner : MonoBehaviour
     public float maxResource = 100;
     public float resourceMultiplier;
     public int level = 1;
+    public Vector3 NPC_Rotation;
 
     [Tooltip("Tempo mínimo entre upgrades consecutivos, para não disparar vários upgrades em sequência quando o recurso acumulado é grande.")]
     [SerializeField] protected float minTimeBetweenUpgrades = 5f;
@@ -108,7 +109,7 @@ public abstract class TroopSpawner : MonoBehaviour
         float offset = transform.lossyScale.z / 2 - prefab.transform.lossyScale.z / 2;
         Vector3 position = transform.position + new Vector3(0, 0, Random.Range(-offset, offset));
 
-        GameObject spawned = Instantiate(prefab, position, Quaternion.identity);
+        GameObject spawned = Instantiate(prefab, position, Quaternion.Euler(NPC_Rotation));
         activeTroops.Add(spawned.transform);
 
         float cooldownDuration;

@@ -7,6 +7,7 @@ public class LifeBarController : MonoBehaviour
 {
     [SerializeField] private Transform HP_Transform;
     [SerializeField] private AnimationCurve flashCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
+    [SerializeField] private float NPC_VerticalSpacing = 0.5f;
 
     [Header("Divisão de barra")]
     [Tooltip("HP máximo representável por uma única barra antes de abrir uma nova acima.")] [SerializeField] private float maxHpPerBar = 20f;
@@ -42,7 +43,7 @@ public class LifeBarController : MonoBehaviour
 
         parentLossyScale = transform.parent != null ? transform.parent.lossyScale : Vector3.one;
 
-        transform.position += Vector3.up * (height / 2) + new Vector3(0, 0.5f, 0);
+        transform.position += Vector3.up * (height / 2) + new Vector3(0, NPC_VerticalSpacing, 0);
 
         Vector3 baseScale = transform.localScale;
 

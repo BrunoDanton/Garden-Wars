@@ -15,8 +15,8 @@ public class NPC_Controller : MonoBehaviour
 
     [Header("Repulsão")]
     public float atkRepulsion = 5;
-    [Tooltip("Reduz o quanto este NPC é empurrado. 1 = normal, >1 = mais resistente, <1 = mais frágil.")] [SerializeField] private float resistance = 1f;
-    [Tooltip("Mapeia a escala do NPC (localScale.x) para um multiplicador de repulsão/knockback.")] [SerializeField] private AnimationCurve scaleRepulsionCurve = AnimationCurve.Linear(0, 1, 3, 3);
+    [Tooltip("Reduz o quanto este NPC é empurrado. 1 = normal, >1 = mais resistente, <1 = mais frágil.")][SerializeField] private float resistance = 1f;
+    [Tooltip("Mapeia a escala do NPC (localScale.x) para um multiplicador de repulsão/knockback.")][SerializeField] private AnimationCurve scaleRepulsionCurve = AnimationCurve.Linear(0, 1, 3, 3);
     [SerializeField] private float baseUpwardForce = 5f;
     [SerializeField] private float baseStunDuration = 0.3f;
     [Tooltip("Velocidade com que o impulso de knockback é absorvido/desacelerado.")]
@@ -26,6 +26,13 @@ public class NPC_Controller : MonoBehaviour
     [SerializeField] private float retargetInterval = 0.25f;
     [Tooltip("Raio usado para procurar inimigos próximos (substitui o antigo trigger).")]
     [SerializeField] private float detectionRadius = 8f;
+
+    [Header("Movimento")]
+    [Tooltip("Distância máxima que QUALQUER tropa pode se afastar (na direção contrária ao avanço) de onde nasceu, por vontade própria — ex: uma tropa ranged recuando/kitando. Não limita o quanto ela é empurrada por knockback de inimigos; só o movimento voluntário é travado nesse limite. Se houver uma torre aliada na cena, o que for mais restritivo entre este valor e a posição da torre prevalece (a tropa nunca recua além da própria torre).")]
+    [SerializeField] private float maxVoluntaryRetreatDistance = 4f;
+    [Tooltip("Multiplica a velocidade de movimento quando a tropa está recuando por vontade própria (ex: 0.5 = recua na metade da velocidade com que avança). Não afeta a velocidade de knockback.")]
+    [Range(0.05f, 1f)]
+    [SerializeField] private float retreatSpeedMultiplier = 0.5f;
 
     [Header("Ataque à distância")]
     [Tooltip("Se marcado, esta tropa para a uma certa distância do alvo e atira projéteis, em vez de avançar até o contato corpo a corpo.")]
@@ -38,6 +45,13 @@ public class NPC_Controller : MonoBehaviour
     [SerializeField] private Transform firePoint;
     [Tooltip("Velocidade de voo do projétil.")]
     [SerializeField] private float projectileSpeed = 15f;
+    [Tooltip("Distância mínima que a tropa tenta manter do inimigo mais próximo, como fração do 'Attack Range' (ex: 0.5 = recua se o inimigo chegar a menos da metade do alcance de ataque). Sempre menor que 'Attack Range' por construção.")]
+    [Range(0f, 0.95f)]
+    [SerializeField] private float retreatDistanceRatio = 0.5f;
+
+    [Header("Impacto (efeito visual)")]
+    [Tooltip("Prefab instanciado no ponto de impacto ao acertar um alvo em ataque corpo a corpo. Precisa ter o componente ImpactDebris. Deixe vazio para não ter efeito de impacto.")]
+    [SerializeField] private GameObject impactEffectPrefab;
 
     [Header("Terreno (CharacterController)")]
     [Tooltip("Altura máxima de degrau que o NPC sobe automaticamente.")]
@@ -60,11 +74,14 @@ public class NPC_Controller : MonoBehaviour
 
     private Transform target = null;
     private Unit_Stats targetStats = null;
-    private Collider targetCollider = null; // NOVO: usado para calcular distância/mira pela superfície real do collider, não pelo pivô
+    private Collider targetCollider = null;
     private float retargetTimer = 0f;
 
     private float verticalVelocity = 0f;
     private Vector3 knockbackVelocity = Vector3.zero;
+
+    private Vector3 spawnPosition;
+    private Transform homeTower;
 
     private NPC_Stats myStats;
 
@@ -81,11 +98,6 @@ public class NPC_Controller : MonoBehaviour
 
         gameObject.layer = isEnemy ? enemyLayer : allyLayer;
 
-        // NOVO: sempre reconfigura (idempotente/barato) em vez de configurar só uma vez.
-        // A trava estática antiga podia "sobreviver" entre execuções do Play Mode se
-        // "Reload Domain" estiver desligado em Enter Play Mode Settings, mesmo com a
-        // matriz de colisão do motor de física sendo resetada a cada novo Play — fazendo
-        // essas regras nunca serem reaplicadas a partir da segunda execução em diante.
         Physics.IgnoreLayerCollision(allyLayer, allyLayer, true);
         Physics.IgnoreLayerCollision(enemyLayer, enemyLayer, true);
         Physics.IgnoreLayerCollision(allyLayer, enemyLayer, false);
@@ -99,6 +111,21 @@ public class NPC_Controller : MonoBehaviour
 
         meshRenderer = GetComponent<MeshRenderer>();
         materialColor = meshRenderer.material.color;
+
+        spawnPosition = transform.position;
+
+        Tower_Stats[] towers = FindObjectsOfType<Tower_Stats>();
+        float closestTowerSqrDist = float.MaxValue;
+        foreach (Tower_Stats tower in towers)
+        {
+            if (tower.isEnemy != isEnemy) continue;
+            float sqrDist = (tower.transform.position - spawnPosition).sqrMagnitude;
+            if (sqrDist < closestTowerSqrDist)
+            {
+                closestTowerSqrDist = sqrDist;
+                homeTower = tower.transform;
+            }
+        }
 
         myStats = GetComponent<NPC_Stats>();
     }
@@ -132,30 +159,58 @@ public class NPC_Controller : MonoBehaviour
                 retargetTimer = retargetInterval;
                 target = FindClosestEnemy();
                 targetStats = (target != null) ? target.GetComponent<Unit_Stats>() : null;
-                targetCollider = (target != null) ? target.GetComponent<Collider>() : null; // NOVO
+                targetCollider = (target != null) ? target.GetComponent<Collider>() : null;
             }
 
-            // NOVO: calcula o ponto mais próximo do collider real do alvo (não o pivô).
-            // Isso é essencial pra alvos grandes como a torre, cujo pivô pode estar
-            // longe da superfície que a tropa realmente precisa alcançar.
             Vector3 closestTargetPoint = target != null ? GetClosestPointOnTarget() : Vector3.zero;
 
-            bool inRangeToStop = false;
-            if (isRanged && target != null)
+            Vector3 towardTargetFlat = Vector3.zero;
+            float distanceToTarget = float.MaxValue;
+            if (target != null)
             {
-                Vector3 flatDiff = closestTargetPoint - transform.position;
-                flatDiff.y = 0f;
-                inRangeToStop = flatDiff.magnitude <= attackRange;
+                towardTargetFlat = closestTargetPoint - transform.position;
+                towardTargetFlat.y = 0f;
+                distanceToTarget = towardTargetFlat.magnitude;
             }
 
-            Vector3 rawDirection = (target == null)
-                ? (isEnemy ? Vector3.left : Vector3.right)
-                : (closestTargetPoint - transform.position);
+            bool inRangeToStop = isRanged && target != null && distanceToTarget <= attackRange;
 
-            rawDirection.y = 0f;
-            Vector3 moveDirection = rawDirection.sqrMagnitude > 0.0001f ? rawDirection.normalized : Vector3.zero;
+            float retreatDistance = attackRange * retreatDistanceRatio;
+            bool shouldRetreat = isRanged && target != null && distanceToTarget < retreatDistance;
 
-            horizontalMotion = inRangeToStop ? Vector3.zero : moveDirection * speed;
+            Vector3 moveDirection;
+            if (target == null)
+            {
+                moveDirection = isEnemy ? Vector3.left : Vector3.right;
+            }
+            else if (shouldRetreat)
+            {
+                moveDirection = towardTargetFlat.sqrMagnitude > 0.0001f ? -towardTargetFlat.normalized : Vector3.zero;
+            }
+            else
+            {
+                moveDirection = towardTargetFlat.sqrMagnitude > 0.0001f ? towardTargetFlat.normalized : Vector3.zero;
+            }
+
+            Vector3 voluntaryMotion = moveDirection * (shouldRetreat ? speed * retreatSpeedMultiplier : speed);
+
+            Vector3 retreatAxis = isEnemy ? Vector3.right : Vector3.left;
+            float retreatLimit = maxVoluntaryRetreatDistance;
+            if (homeTower != null)
+            {
+                float towerBackwardOffset = Vector3.Dot(homeTower.position + new Vector3((isEnemy)? -5: 5, 0, 0) - spawnPosition, retreatAxis);
+                retreatLimit = Mathf.Min(retreatLimit, towerBackwardOffset);
+            }
+
+            float currentBackwardOffset = Vector3.Dot(transform.position - spawnPosition, retreatAxis);
+            float voluntaryBackwardComponent = Vector3.Dot(voluntaryMotion, retreatAxis);
+
+            if (voluntaryBackwardComponent > 0f && currentBackwardOffset >= retreatLimit)
+            {
+                voluntaryMotion -= retreatAxis * voluntaryBackwardComponent;
+            }
+
+            horizontalMotion = (inRangeToStop && !shouldRetreat) ? Vector3.zero : voluntaryMotion;
 
             if (inRangeToStop)
             {
@@ -176,7 +231,7 @@ public class NPC_Controller : MonoBehaviour
 
     void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        if (isRanged) return; // tropas ranged nunca causam dano por contato, só por projétil
+        if (isRanged) return;
         if (stunTimer > 0f) return;
         if (myStats != null && myStats.IsDead) return;
 
@@ -196,7 +251,31 @@ public class NPC_Controller : MonoBehaviour
                 {
                     targetStats.TryTakeHitFrom(myStats);
                     myStats.ResetAttackTimer();
+                    SpawnImpactEffect(hit.point);
                 }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Instancia o prefab de efeito de impacto (ImpactDebris) no ponto de acerto — uma
+    /// instância para cada ponto de dano causado (ex: 5 de dano = 5 prefabs, cada um com
+    /// seu próprio ângulo de curva sorteado) —, usando a direção para a qual este
+    /// atacante está virado como direção inicial do efeito.
+    /// </summary>
+    private void SpawnImpactEffect(Vector3 position)
+    {
+        if (impactEffectPrefab == null || myStats == null) return;
+
+        int debrisCount = Mathf.Max(1, Mathf.RoundToInt(myStats.damage));
+
+        for (int i = 0; i < debrisCount; i++)
+        {
+            GameObject effectObj = Instantiate(impactEffectPrefab, position, Quaternion.identity);
+            ImpactDebris effect = effectObj.GetComponent<ImpactDebris>();
+            if (effect != null)
+            {
+                effect.Launch(transform.forward);
             }
         }
     }
@@ -205,17 +284,10 @@ public class NPC_Controller : MonoBehaviour
     /// Retorna o ponto mais próximo da superfície do collider do alvo em relação a esta tropa.
     /// Cai de volta para o pivô (target.position) se o alvo não tiver um Collider acessível.
     /// </summary>
-    // NOVO
     private Vector3 GetClosestPointOnTarget()
     {
         if (targetCollider != null)
         {
-            // IMPORTANTE: Collider.ClosestPoint() só funciona corretamente em colliders
-            // CONVEXOS (Box, Sphere, Capsule, ou Mesh Collider com "Convex" marcado).
-            // Se a Torre usa um Mesh Collider não-convexo (bem comum em modelos maiores/
-            // detalhados), aquele método falha silenciosamente e devolve valores errados.
-            // Bounds.ClosestPoint() usa a caixa delimitadora (AABB) do collider, o que
-            // funciona para QUALQUER tipo de collider, convexo ou não.
             return targetCollider.bounds.ClosestPoint(transform.position);
         }
         return target.position;
@@ -231,20 +303,16 @@ public class NPC_Controller : MonoBehaviour
 
         Vector3 spawnPosition = firePoint != null ? firePoint.position : transform.position;
 
-        // NOVO: mira no centro real do collider do alvo (inclui altura), em vez de assumir
-        // que o alvo está sempre na mesma altura da tropa. Resolve o projétil "passando por
-        // baixo" de alvos grandes como a torre.
         Vector3 aimPoint = targetCollider != null ? targetCollider.bounds.center : target.position;
 
-        Vector3 direction = aimPoint - spawnPosition;
-        if (direction.sqrMagnitude < 0.0001f) return;
+        if ((aimPoint - spawnPosition).sqrMagnitude < 0.0001f) return;
 
         GameObject projectileObj = Instantiate(projectilePrefab, spawnPosition, Quaternion.identity);
 
         Projectile projectile = projectileObj.GetComponent<Projectile>();
         if (projectile != null)
         {
-            projectile.Launch(direction, projectileSpeed, myStats);
+            projectile.Launch(aimPoint, projectileSpeed, myStats);
         }
         else
         {
@@ -288,9 +356,6 @@ public class NPC_Controller : MonoBehaviour
 
     private Transform FindClosestEnemy()
     {
-        // NOVO: se attackRange for maior que detectionRadius (ex: ajustado no Inspector
-        // durante testes), a tropa nunca conseguiria detectar algo que ela teoricamente
-        // já poderia atacar. Isso garante consistência entre os dois valores.
         float effectiveDetectionRadius = isRanged ? Mathf.Max(detectionRadius, attackRange) : detectionRadius;
         Collider[] hits = Physics.OverlapSphere(transform.position, effectiveDetectionRadius);
 
@@ -299,18 +364,16 @@ public class NPC_Controller : MonoBehaviour
 
         foreach (Collider hitCollider in hits)
         {
-            // 1. Garante que o alvo é uma unidade ou torre válida (ambos herdam de Unit_Stats)
             Unit_Stats candidateStats = hitCollider.GetComponent<Unit_Stats>();
             if (candidateStats == null) continue;
 
-            // 2. Descobre de quem é o alvo e se é inimigo (mesma lógica do Projectile.cs)
             bool isTargetEnemy;
             NPC_Controller candidateNPC = hitCollider.GetComponent<NPC_Controller>();
             Tower_Stats candidateTower = hitCollider.GetComponent<Tower_Stats>();
 
             if (candidateNPC != null)
             {
-                if (candidateNPC == this) continue; // Ignora a si mesmo
+                if (candidateNPC == this) continue;
                 isTargetEnemy = candidateNPC.isEnemy;
             }
             else if (candidateTower != null)
@@ -319,17 +382,11 @@ public class NPC_Controller : MonoBehaviour
             }
             else
             {
-                continue; // Não é NPC nem Torre (terreno, etc)
+                continue;
             }
 
-            // 3. Se for aliado (fogo amigo), ignora
             if (isTargetEnemy == isEnemy) continue;
 
-            // 4. NOVO: usa o ponto mais próximo do collider (não o pivô) para escolher
-            // o alvo realmente mais próximo. Crítico para objetos grandes como a torre,
-            // cujo pivô pode estar bem longe da superfície de contato real.
-            // Usa Bounds.ClosestPoint (funciona em qualquer tipo de collider) em vez de
-            // Collider.ClosestPoint (só funciona em colliders convexos).
             Vector3 closestPoint = hitCollider.bounds.ClosestPoint(transform.position);
             float sqrDist = (closestPoint - transform.position).sqrMagnitude;
             if (sqrDist < closestSqrDist)

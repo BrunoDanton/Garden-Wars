@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: a4844f37de3237947910b67c34cf6b03
+AssemblyDefinitionImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 379942
+  packageName: Plastic Army Men Recon Pack
+  packageVersion: 1.0
+  assetPath: Assets/PlasticArmyMen/Core/PlasticArmyMen.Core.asmdef
+  uploadId: 915950

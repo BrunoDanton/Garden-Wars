@@ -27,14 +27,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2294893852045257835}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0, y: 0.2, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1005765979286294759}
   m_Father: {fileID: 2011486742988748300}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
 --- !u!33 &1036292138717237862
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -129,6 +129,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  NPC_VerticalSpacing: 0.5
   maxHpPerBar: 20
   barVerticalSpacing: 0.3
 --- !u!1 &3549933724147763297
@@ -445,6 +446,15 @@ MonoBehaviour:
   knockbackDamping: 5
   retargetInterval: 0.25
   detectionRadius: 8
+  maxVoluntaryRetreatDistance: 4
+  retreatSpeedMultiplier: 0.5
+  isRanged: 0
+  attackRange: 6
+  projectilePrefab: {fileID: 0}
+  firePoint: {fileID: 0}
+  projectileSpeed: 15
+  retreatDistanceRatio: 0.5
+  impactEffectPrefab: {fileID: 3589646587917458579, guid: 92d86d4c947d0d54bb889b581033f0de, type: 3}
   stepOffset: 0.4
   slopeLimit: 45
   gravity: -20
@@ -489,6 +499,7 @@ MonoBehaviour:
   hp: 10
   maxHP: 10
   lifeBar: {fileID: 2294893852045257835}
+  onDeathReward: 0
   damage: 2
   spawnCooldown: 1
   toSpawnResource: 30

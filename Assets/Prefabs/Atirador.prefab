@@ -102,7 +102,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4027159840092466005, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: spawnCooldown
-      value: 8
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4027159840092466005, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: attackCooldown
@@ -110,11 +110,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4027159840092466005, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: toSpawnResource
-      value: 50
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 4027159840092466005, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: unlockedAtLevel
-      value: 5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5468389999452270452, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: m_Layer
@@ -159,6 +159,10 @@ PrefabInstance:
     - target: {fileID: 8385881727131199245, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: baseUpwardForce
       value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8385881727131199245, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
+      propertyPath: detectionRadius
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 8385881727131199245, guid: e7810239eabf3cb41a44e36aa4e98340, type: 3}
       propertyPath: projectileSpeed

@@ -219,3 +219,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Projectile
   lifeTime: 10
+  castRadius: 0.1
+  gravity: -20
+  trailPrefab: {fileID: 774262663033319192, guid: da6bf1ea8721d8e48a727950586a9fb7, type: 3}
+  trailSpawnInterval: 0.05
+  impactEffectPrefab: {fileID: 3589646587917458579, guid: 92d86d4c947d0d54bb889b581033f0de, type: 3}
