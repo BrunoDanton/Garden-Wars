@@ -8,6 +8,7 @@ using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Manages the UI canvas elements including health bars, domination indicators, resources, and troop UI states.
+/// Handles global UI audio interactions and music transitions.
 /// </summary>
 public class CanvasManager : MonoBehaviour
 {
@@ -34,16 +35,14 @@ public class CanvasManager : MonoBehaviour
     public TextMeshProUGUI timer;
 
     [Header("Timer")]
-    [Tooltip("Tempo inicial do timer, em segundos. 600 = 10 minutos.")]
     [SerializeField] private float startingTimeInSeconds = 600f;
     private float remainingTime;
 
     [Header("Animação de Números")]
-    [Tooltip("Duração, em segundos, da animação de lerp quando um número de UI muda.")]
     [SerializeField] private float numberLerpDuration = 0.4f;
 
     /// <summary>
-    /// Tempo decorrido desde o início da partida, em segundos.
+    /// Elapsed time since the match started, in seconds.
     /// </summary>
     public float ElapsedTime => startingTimeInSeconds - remainingTime;
 
@@ -61,13 +60,8 @@ public class CanvasManager : MonoBehaviour
     public GameObject SettingsPanel;
 
     [Header("Troops UI")]
-    [Tooltip("Imagem de cooldown de cada tropa, na mesma ordem da lista 'troops' do PlayerTroopSpawner (até 6).")]
     public List<Image> troopImages = new List<Image>();
-
-    [Tooltip("Texto de preço de cada tropa, na mesma ordem da lista 'troops' do PlayerTroopSpawner (até 6).")]
     public List<TextMeshProUGUI> troopPriceTexts = new List<TextMeshProUGUI>();
-
-    [Tooltip("Imagem de 'bloqueado' de cada tropa, na mesma ordem da lista 'troops' do PlayerTroopSpawner (até 6). Fica ativa enquanto o level do jogador for menor que o unlockedAtLevel da tropa.")]
     public List<Image> blockedTroops = new List<Image>();
 
     [Header("Tower UI")]
@@ -76,6 +70,23 @@ public class CanvasManager : MonoBehaviour
     [Header("Loading Panel")]
     public Image loadingPanelImage;
     public float fadeDuration = 1f;
+
+    [Header("Audio")]
+    public AudioClip backgroundMusic;
+    public AudioClip victoryMusic;
+    public AudioClip defeatMusic;
+    [Range(0f, 1f)] public float maxMusicVolume = 0.5f;
+    public float musicFadeDuration = 2f;
+    private AudioSource musicSource;
+    private Coroutine musicTransitionCoroutine;
+    
+    public AudioClip genericPressSound;
+    [Range(0f, 1f)] public float genericPressVolume = 1f;
+    public AudioClip unitPressSound;
+    [Range(0f, 1f)] public float unitPressVolume = 1f;
+
+    /* Alteration: Added an AudioSource reference specifically for playing UI sound effects attached to the camera. */
+    private AudioSource sfxSource;
 
     [Header("Panel Animation")]
     public float panelFadeDuration = 0.3f;
@@ -114,7 +125,7 @@ public class CanvasManager : MonoBehaviour
     private Coroutine[] troopPriceNumberCoroutines;
 
     /// <summary>
-    /// Initializes RectTransforms and dimensions for the UI elements.
+    /// Initializes RectTransforms, UI events, inputs, and starts the initial music fade-in.
     /// </summary>
     void Start()
     {
@@ -150,6 +161,28 @@ public class CanvasManager : MonoBehaviour
         {
             loadingPanelImage.gameObject.SetActive(true);
             StartCoroutine(FadeLoadingPanel(1f, 0f, () => loadingPanelImage.gameObject.SetActive(false)));
+        }
+
+        if (backgroundMusic != null)
+        {
+            musicSource = gameObject.AddComponent<AudioSource>();
+            musicSource.clip = backgroundMusic;
+            musicSource.loop = true;
+            musicSource.volume = 0f;
+            musicSource.Play();
+            musicTransitionCoroutine = StartCoroutine(FadeInMusic());
+        }
+
+        /* Alteration: Instantiates a dedicated UI AudioSource on the Main Camera to prevent spatial panning issues during camera movement. */
+        if (Camera.main != null)
+        {
+            sfxSource = Camera.main.gameObject.AddComponent<AudioSource>();
+            sfxSource.spatialBlend = 0f;
+        }
+        else
+        {
+            sfxSource = gameObject.AddComponent<AudioSource>();
+            sfxSource.spatialBlend = 0f;
         }
 
         ButtonHoverAnimator.ApplyTo(UpgradeTower, 1.1f, 0.9f, 0.15f, () => InputManager.Instance.WasUpgradeKeyPressed());
@@ -219,6 +252,8 @@ public class CanvasManager : MonoBehaviour
     /// </summary>
     void Update()
     {
+        PlayInputSounds();
+
         float targetPHPWidth = pHP_Width * (playerTowerStats.hp / playerTowerStats.maxHP);
         pHP.sizeDelta = new Vector2(Mathf.Lerp(pHP.sizeDelta.x, targetPHPWidth, Time.unscaledDeltaTime * barLerpSpeed), pHP.sizeDelta.y);
 
@@ -293,6 +328,54 @@ public class CanvasManager : MonoBehaviour
     }
 
     /// <summary>
+    /// Polls the InputManager to detect any generic or unit-specific actions requested this frame,
+    /// triggering the corresponding audio clip.
+    /// </summary>
+    private void PlayInputSounds()
+    {
+        if (InputManager.Instance.WasRestartLevelKeyPressed() ||
+            InputManager.Instance.WasPauseKeyPressed() ||
+            InputManager.Instance.WasSettingsButtonPressed() ||
+            InputManager.Instance.WasGoHomeButtonPressed() ||
+            InputManager.Instance.WasExitButtonPressed() ||
+            InputManager.Instance.WasExitMenuKeyPressed())
+        {
+            PlaySound(genericPressSound, genericPressVolume);
+        }
+
+        bool playUnitSound = InputManager.Instance.WasUpgradeKeyPressed();
+
+        if (!playUnitSound)
+        {
+            for (int i = 0; i < playerTroopSpawner.troops.Count; i++)
+            {
+                if (InputManager.Instance.WasTroopSpawnKeyPressed(i))
+                {
+                    playUnitSound = true;
+                    break;
+                }
+            }
+        }
+
+        if (playUnitSound)
+        {
+            PlaySound(unitPressSound, unitPressVolume);
+        }
+    }
+
+    /* Alteration: Replaced PlayClipAtPoint with PlayOneShot utilizing the camera-attached AudioSource to maintain position and volume. */
+    /// <summary>
+    /// Plays the specified audio clip using the dedicated UI AudioSource.
+    /// </summary>
+    private void PlaySound(AudioClip clip, float volume)
+    {
+        if (clip != null && sfxSource != null)
+        {
+            sfxSource.PlayOneShot(clip, volume);
+        }
+    }
+
+    /// <summary>
     /// Updates the resources text UI with the currently displayed (lerped) values.
     /// </summary>
     private void UpdateResourcesText()
@@ -321,13 +404,11 @@ public class CanvasManager : MonoBehaviour
     }
 
     private void HandleUpgradeTowerClicked() => InputManager.Instance.RequestUpgrade();
-
     private void HandleUnit1Clicked() => InputManager.Instance.RequestTroopSpawn(0);
     private void HandleUnit2Clicked() => InputManager.Instance.RequestTroopSpawn(1);
     private void HandleUnit3Clicked() => InputManager.Instance.RequestTroopSpawn(2);
     private void HandleUnit4Clicked() => InputManager.Instance.RequestTroopSpawn(3);
     private void HandleUnit5Clicked() => InputManager.Instance.RequestTroopSpawn(4);
-
     private void HandleRestartLevelClicked() => InputManager.Instance.RequestRestartLevel();
     private void HandlePauseClicked() => InputManager.Instance.RequestPause();
     private void HandleResumeClicked() => InputManager.Instance.RequestPause();
@@ -482,6 +563,81 @@ public class CanvasManager : MonoBehaviour
     }
 
     /// <summary>
+    /// Initiates a crossfade transition to either the victory or defeat music track.
+    /// </summary>
+    public void PlayEndgameMusic(bool isVictory)
+    {
+        AudioClip nextClip = isVictory ? victoryMusic : defeatMusic;
+        if (nextClip != null && musicSource != null)
+        {
+            if (musicTransitionCoroutine != null) StopCoroutine(musicTransitionCoroutine);
+            musicTransitionCoroutine = StartCoroutine(CrossfadeMusic(nextClip));
+        }
+    }
+
+    /// <summary>
+    /// Fades in the initial background music volume from zero to maxMusicVolume over a set duration.
+    /// </summary>
+    private IEnumerator FadeInMusic()
+    {
+        float elapsed = 0f;
+        while (elapsed < musicFadeDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            musicSource.volume = Mathf.Lerp(0f, maxMusicVolume, elapsed / musicFadeDuration);
+            yield return null;
+        }
+        musicSource.volume = maxMusicVolume;
+    }
+
+    /// <summary>
+    /// Fades out the current playing music, swaps the clip, and fades the new clip in.
+    /// </summary>
+    private IEnumerator CrossfadeMusic(AudioClip newClip)
+    {
+        float elapsed = 0f;
+        float startVolume = musicSource.volume;
+        float halfDuration = musicFadeDuration / 2f;
+
+        while (elapsed < halfDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            musicSource.volume = Mathf.Lerp(startVolume, 0f, elapsed / halfDuration);
+            yield return null;
+        }
+
+        musicSource.clip = newClip;
+        musicSource.Play();
+        elapsed = 0f;
+
+        while (elapsed < halfDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            musicSource.volume = Mathf.Lerp(0f, maxMusicVolume, elapsed / halfDuration);
+            yield return null;
+        }
+
+        musicSource.volume = maxMusicVolume;
+    }
+
+    /// <summary>
+    /// Smoothly fades out the music volume completely to prepare for a scene transition.
+    /// </summary>
+    private IEnumerator FadeOutMusic()
+    {
+        float elapsed = 0f;
+        float startVolume = musicSource.volume;
+
+        while (elapsed < fadeDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            musicSource.volume = Mathf.Lerp(startVolume, 0f, elapsed / fadeDuration);
+            yield return null;
+        }
+        musicSource.volume = 0f;
+    }
+
+    /// <summary>
     /// Checks if the target numerical value has changed and starts a lerp animation coroutine if necessary.
     /// </summary>
     private void AnimateIfChanged(float targetValue, ref float lastTarget, ref float displayedValue, ref Coroutine coroutine, Action<float> onUpdate)
@@ -516,6 +672,12 @@ public class CanvasManager : MonoBehaviour
         if (Time.timeScale <= 0f)
         {
             Time.timeScale = 0.1f;
+        }
+
+        if (musicSource != null)
+        {
+            if (musicTransitionCoroutine != null) StopCoroutine(musicTransitionCoroutine);
+            musicTransitionCoroutine = StartCoroutine(FadeOutMusic());
         }
 
         if (loadingPanelImage != null)

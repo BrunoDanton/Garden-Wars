@@ -15,12 +15,43 @@ public class EnemyTroopSpawner : TroopSpawner
     [Tooltip("Distância a partir da qual uma tropa é considerada 'avançada' e a pressão já está garantida.")]
     [SerializeField] private float advancedDistanceThreshold = 3f;
 
+    // Alteração: Campo adicionado para referenciar o spawner do jogador e medir o avanço inimigo real.
+    [SerializeField] private TroopSpawner playerSpawner;
+
+    [Header("Rubber banding (facilita quando o jogador perde, dificulta quando avança)")]
+    [Tooltip("Distância de avanço do jogador a partir da qual a IA já está no modo mais fácil (spawn mais lento). Sem tropas do jogador em campo conta como esse modo.")]
+    [SerializeField] private float easyDistanceThreshold = 9f;
+    [Tooltip("Multiplicador do intervalo de spawn quando o jogador está bem contido (facilita a IA). Ex.: 1.6 = 60% mais devagar.")]
+    [SerializeField] private float easyIntervalMultiplier = 1.6f;
+    [Tooltip("Multiplicador do intervalo de spawn quando o jogador está muito avançado (dificulta a IA). Ex.: 0.5 = spawna 2x mais rápido.")]
+    [SerializeField] private float hardIntervalMultiplier = 0.5f;
+
+    /// <summary>
+    /// Dominance gate: each troop is only released when the player's advancement (distance from the 
+    /// closest troop to enemyTower) is within what it requires in TroopEntry.maxDistanceToSpawn.
+    /// An "always available" troop should have maxDistanceToSpawn = Mathf.Infinity.
+    /// A troop "only when the player advances too much" should have a low value, typically close to or below advancedDistanceThreshold.
+    /// </summary>
     protected override bool ShouldSpawn(int troopIndex)
     {
-        // Decisão de "precisa de mais pressão" independe do tipo de tropa; a escolha de QUAL
-        // tropa spawnar continua a cargo do TroopSpawner (cooldown/recurso de cada uma).
-        float closest = ClosestTroopDistanceTo(enemyTower.position);
-        return closest > advancedDistanceThreshold;
+        // Alteração: Medição de distância modificada para buscar a tropa a partir do spawner do jogador.
+        float closest = playerSpawner.ClosestTroopDistanceTo(enemyTower.position);
+        return closest <= troops[troopIndex].maxDistanceToSpawn;
+    }
+
+    /// <summary>
+    /// Continuous rubber banding: the closer the player is to enemyTower, the shorter the interval 
+    /// between spawns (harder); the further away (player contained/losing), the longer the interval 
+    /// (easier). Always clamped between easyIntervalMultiplier and hardIntervalMultiplier.
+    /// </summary>
+    protected override float GetSpawnIntervalMultiplier(int troopIndex)
+    {
+        // Alteração: Medição de distância modificada para buscar a tropa a partir do spawner do jogador.
+        float closest = playerSpawner.ClosestTroopDistanceTo(enemyTower.position);
+        if (closest == float.MaxValue) closest = easyDistanceThreshold;
+
+        float t = Mathf.InverseLerp(easyDistanceThreshold, advancedDistanceThreshold, closest);
+        return Mathf.Lerp(easyIntervalMultiplier, hardIntervalMultiplier, t);
     }
 
     protected override bool ShouldUpgrade()
@@ -29,17 +60,18 @@ public class EnemyTroopSpawner : TroopSpawner
         bool hasSurplus = resource - tower_Stats.toUpgradeResource >= reserveForTroops;
         if (!hasSurplus) return false;
 
-        float closest = ClosestTroopDistanceTo(enemyTower.position);
+        // Alteração: Medição de distância modificada para buscar a tropa a partir do spawner do jogador.
+        float closest = playerSpawner.ClosestTroopDistanceTo(enemyTower.position);
         bool pressureSecured = closest <= advancedDistanceThreshold;
 
         return pressureSecured && Random.value >= upgradeSkipChance;
     }
 
     /// <summary>
-    /// Custo da tropa mais barata entre as que ainda disputam recurso (spawnsOnTimer == false),
-    /// usada como referência de reserva antes de investir em upgrade. Tropas por tempo não entram
-    /// aqui, pois não competem pelo recurso — se todas as tropas forem por tempo, a reserva cai a
-    /// zero e o recurso fica inteiramente livre para upgrades.
+    /// Cost of the cheapest troop among those that still compete for resources (spawnsOnTimer == false), 
+    /// used as a reference reserve before investing in an upgrade. Timer troops are not included here, 
+    /// as they do not compete for resources. If all troops are timer-based, the reserve drops to zero 
+    /// and the resource is entirely free for upgrades.
     /// </summary>
     private float CheapestTroopCost()
     {

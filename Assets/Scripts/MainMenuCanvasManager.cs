@@ -10,6 +10,7 @@ using UnityEngine.UI;
 /// InputManager.WasExitMenuKeyPressed) or clicking the exit button of the
 /// respective panel. Both paths pass through InputManager and land
 /// in the same HandleMenuExit, centralizing the closing logic.
+/// Handles background music with fade-in and fade-out mechanics.
 /// </summary>
 public class MainMenuCanvasManager : MonoBehaviour
 {
@@ -28,6 +29,17 @@ public class MainMenuCanvasManager : MonoBehaviour
     public Image loadingPanelImage;
     public float fadeDuration = 1f;
 
+    /* Alteration: Added fields for background music management and transition control */
+    [Header("Audio")]
+    public AudioClip backgroundMusic;
+    [Range(0f, 1f)] public float maxMusicVolume = 0.5f;
+    public float musicFadeDuration = 2f;
+    private AudioSource musicSource;
+    private Coroutine musicTransitionCoroutine;
+
+    public AudioClip buttonPressSound;
+    [Range(0f, 1f)] public float buttonPressVolume = 1f;
+
     [Header("Panel Animation")]
     public float panelFadeDuration = 0.3f;
     private Coroutine creditsFadeCoroutine;
@@ -41,7 +53,17 @@ public class MainMenuCanvasManager : MonoBehaviour
             StartCoroutine(FadeLoadingPanel(1f, 0f, () => loadingPanelImage.gameObject.SetActive(false)));
         }
 
-        /* Alteration: Replaced repetitive hover scale logic with the new helper utility */
+        /* Alteration: Dynamically instantiates the AudioSource for the background music and begins the fade-in */
+        if (backgroundMusic != null)
+        {
+            musicSource = gameObject.AddComponent<AudioSource>();
+            musicSource.clip = backgroundMusic;
+            musicSource.loop = true;
+            musicSource.volume = 0f;
+            musicSource.Play();
+            musicTransitionCoroutine = StartCoroutine(FadeInMusic());
+        }
+
         ButtonHoverAnimator.ApplyTo(Play);
         ButtonHoverAnimator.ApplyTo(Credits);
         ButtonHoverAnimator.ApplyTo(Settings);
@@ -56,6 +78,12 @@ public class MainMenuCanvasManager : MonoBehaviour
         Settings.onClick.AddListener(HandleSettingsClicked);
         ExitCredits.onClick.AddListener(HandleExitMenuButtonClicked);
         ExitSettings.onClick.AddListener(HandleExitMenuButtonClicked);
+
+        Play.onClick.AddListener(PlayButtonSound);
+        Credits.onClick.AddListener(PlayButtonSound);
+        Settings.onClick.AddListener(PlayButtonSound);
+        ExitCredits.onClick.AddListener(PlayButtonSound);
+        ExitSettings.onClick.AddListener(PlayButtonSound);
     }
 
     void OnDisable()
@@ -65,6 +93,12 @@ public class MainMenuCanvasManager : MonoBehaviour
         Settings.onClick.RemoveListener(HandleSettingsClicked);
         ExitCredits.onClick.RemoveListener(HandleExitMenuButtonClicked);
         ExitSettings.onClick.RemoveListener(HandleExitMenuButtonClicked);
+
+        Play.onClick.RemoveListener(PlayButtonSound);
+        Credits.onClick.RemoveListener(PlayButtonSound);
+        Settings.onClick.RemoveListener(PlayButtonSound);
+        ExitCredits.onClick.RemoveListener(PlayButtonSound);
+        ExitSettings.onClick.RemoveListener(PlayButtonSound);
     }
 
     void Update()
@@ -75,8 +109,26 @@ public class MainMenuCanvasManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Plays the generic button press sound safely at the camera's position.
+    /// </summary>
+    private void PlayButtonSound()
+    {
+        if (buttonPressSound != null)
+        {
+            AudioSource.PlayClipAtPoint(buttonPressSound, Camera.main != null ? Camera.main.transform.position : Vector3.zero, buttonPressVolume);
+        }
+    }
+
     private void HandlePlayClicked()
     {
+        /* Alteration: Triggers the music fade-out synchronously with the loading panel fade */
+        if (musicSource != null)
+        {
+            if (musicTransitionCoroutine != null) StopCoroutine(musicTransitionCoroutine);
+            musicTransitionCoroutine = StartCoroutine(FadeOutMusic());
+        }
+
         if (loadingPanelImage != null)
         {
             loadingPanelImage.gameObject.SetActive(true);
@@ -124,6 +176,41 @@ public class MainMenuCanvasManager : MonoBehaviour
             if (settingsFadeCoroutine != null) StopCoroutine(settingsFadeCoroutine);
             settingsFadeCoroutine = StartCoroutine(FadePanel(SettingsPanel, false));
         }
+    }
+
+    /* Alteration: Added coroutine to fade in the background music over a set duration */
+    /// <summary>
+    /// Fades in the background music volume from zero to maxMusicVolume over a set duration.
+    /// </summary>
+    private IEnumerator FadeInMusic()
+    {
+        float elapsed = 0f;
+        while (elapsed < musicFadeDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            musicSource.volume = Mathf.Lerp(0f, maxMusicVolume, elapsed / musicFadeDuration);
+            yield return null;
+        }
+        musicSource.volume = maxMusicVolume;
+    }
+
+    /* Alteration: Added coroutine to exclusively fade out music during scene unloads */
+    /// <summary>
+    /// Smoothly fades out the music volume completely to prepare for a scene transition.
+    /// Uses fadeDuration to sync perfectly with the visual screen fade.
+    /// </summary>
+    private IEnumerator FadeOutMusic()
+    {
+        float elapsed = 0f;
+        float startVolume = musicSource.volume;
+
+        while (elapsed < fadeDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            musicSource.volume = Mathf.Lerp(startVolume, 0f, elapsed / fadeDuration);
+            yield return null;
+        }
+        musicSource.volume = 0f;
     }
 
     /// <summary>

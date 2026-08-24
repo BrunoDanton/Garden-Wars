@@ -357,7 +357,9 @@ MonoBehaviour:
     & LUIGI\n\nART:\nBRUNO, EVERTON & LUIGI\n\nmUSIC: \nCAINA\n\nPuppet | Kid | Free
     Demo:\nJoao Baltieri\n\nSimplePoly City - Low Poly Assets: \nVan Creations\n\nAdventure
     UI Kit: \nSmashy Tech\n\n3D set of stylized nature - GHIBLI style:\nBaturinets\n\nQMS
-    - Cartoon Skybox Pack FREE:\nQuantum Mana Studio"
+    - Cartoon Skybox Pack FREE:\nQuantum Mana Studio\n\nPlastic Army Recon Pack:\nChris
+    Burns\n\nUkraine Only Truck:\nKOS-Store\n\norelh\xE3o:\nHerdiana Sofia\n\nCaixa
+    d'\xC1gua:\nMarcos Silva\n\nFusca Azul:\nwalter araujo"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 5437dfbe569d50e4f8b87e312a1ca5a1, type: 2}
   m_sharedMaterial: {fileID: -4831851902156085819, guid: 5437dfbe569d50e4f8b87e312a1ca5a1, type: 2}
@@ -1407,6 +1409,11 @@ MonoBehaviour:
   SettingsPanel: {fileID: 1244298388}
   loadingPanelImage: {fileID: 1179322801}
   fadeDuration: 1
+  backgroundMusic: {fileID: 8300000, guid: ec87345aa16d63c4c9892496249a37a9, type: 3}
+  maxMusicVolume: 0.5
+  musicFadeDuration: 2
+  buttonPressSound: {fileID: 8300000, guid: 7841513a06926b24c883fa15d240e9e5, type: 3}
+  buttonPressVolume: 1
   panelFadeDuration: 0.3
 --- !u!1 &1013866982
 GameObject:

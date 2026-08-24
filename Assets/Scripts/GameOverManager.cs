@@ -117,6 +117,12 @@ public class GameOverManager : MonoBehaviour
     {
         gameEnded = true;
 
+        /* Alteration: Triggers the centralized music crossfade inside CanvasManager based on the match result */
+        if (canvasManager != null)
+        {
+            canvasManager.PlayEndgameMusic(isVictory);
+        }
+
         int elapsedSeconds = Mathf.CeilToInt(canvasManager != null ? canvasManager.ElapsedTime : 0f);
         int finalEnemies = enemiesDefeated - OnStartEnemiesDefeated;
         int finalMoney = CoinManager.totalMoney - OnStartMoney;

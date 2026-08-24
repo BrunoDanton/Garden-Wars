@@ -42,13 +42,9 @@ public abstract class TroopSpawner : MonoBehaviour
         {
             TroopEntry entry = troops[i];
 
-            if (entry.cooldown <= 0)
+            if (entry.cooldown <= 0 && level >= entry.troopStats.unlockedAtLevel && ShouldSpawn(i))
             {
-                if (entry.spawnsOnTimer && level >= entry.troopStats.unlockedAtLevel)
-                {
-                    SpawnTroop(i);
-                }
-                else if (resource >= entry.troopStats.toSpawnResource && ShouldSpawn(i) && level >= entry.troopStats.unlockedAtLevel)
+                if (entry.spawnsOnTimer || resource >= entry.troopStats.toSpawnResource)
                 {
                     SpawnTroop(i);
                 }
@@ -73,6 +69,13 @@ public abstract class TroopSpawner : MonoBehaviour
     /// <summary>Deve retornar true no frame em que o jogador/IA pediu o spawn da tropa de índice 'troopIndex' (0 a troops.Count - 1).</summary>
     protected abstract bool ShouldSpawn(int troopIndex);
     protected abstract bool ShouldUpgrade();
+
+    /// <summary>
+    /// Multiplicador aplicado ao intervalo de spawn de uma tropa por timer (antes da variância).
+    /// 1 = intervalo normal, menor que 1 = spawna mais rápido, maior que 1 = spawna mais devagar.
+    /// Base retorna sempre 1; subclasses (ex.: EnemyTroopSpawner) sobrescrevem para rubber-banding.
+    /// </summary>
+    protected virtual float GetSpawnIntervalMultiplier(int troopIndex) => 1f;
 
     /// <summary>
     /// Distância (em linha reta) da tropa viva mais próxima do ponto informado, entre as
@@ -117,7 +120,8 @@ public abstract class TroopSpawner : MonoBehaviour
         if (entry.spawnsOnTimer)
         {
             float variance = Random.Range(-entry.spawnIntervalVariance, entry.spawnIntervalVariance);
-            cooldownDuration = Mathf.Max(0.1f, entry.spawnInterval + variance);
+            float multiplier = GetSpawnIntervalMultiplier(index);
+            cooldownDuration = Mathf.Max(0.1f, (entry.spawnInterval + variance) * multiplier);
         }
         else
         {
