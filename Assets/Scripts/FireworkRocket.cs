@@ -10,7 +10,7 @@ using System.Collections.Generic;
 /// UI de vida, o piscar vermelho e a economia (CoinManager ao matar inimigos) continuam
 /// funcionando normalmente nos alvos atingidos.
 /// </summary>
-[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(CharacterController))]
 public class FireworkRocket : MonoBehaviour
 {
     [Header("Voo")]
@@ -19,34 +19,51 @@ public class FireworkRocket : MonoBehaviour
     [SerializeField] private float speed = 10f;
     [Tooltip("Tempo máximo de voo antes de se autodestruir, caso não acerte nada.")]
     [SerializeField] private float lifeTime = 6f;
-    [Tooltip("Raio usado na checagem de trajetória entre frames (mesma técnica do Projectile, evita atravessar alvos).")]
-    [SerializeField] private float castRadius = 0.2f;
+
+    [Header("Rastro (efeito visual)")]
+    [Tooltip("Prefab instanciado periodicamente na posição do foguete enquanto ele voa (ex: TrailParticle). Deixe vazio para não ter rastro.")]
+    [SerializeField] private GameObject trailPrefab;
+    [Tooltip("Intervalo, em segundos, entre cada leva de partículas de rastro.")]
+    [SerializeField] private float trailSpawnInterval = 0.05f;
+    [Tooltip("Quantas partículas são instanciadas de uma vez a cada intervalo (cada uma sorteia sua própria direção de espalhamento, ex: no TrailParticle).")]
+    [SerializeField] private int trailParticlesPerSpawn = 3;
+
+    private float trailSpawnTimer = 0f;
 
     [Header("Explosão")]
     [Tooltip("Raio da explosão: tudo (tropas + torre) inimigo dentro desse raio do ponto de impacto toma dano.")]
     [SerializeField] private float explosionRadius = 4f;
-    [Tooltip("Opcional: prefab de efeito visual instanciado no ponto da explosão. Pode deixar vazio.")]
-    [SerializeField] private GameObject explosionVfxPrefab;
+    [Tooltip("Prefab de estilhaço instanciado no ponto da explosão (não em cada alvo) — precisa ter o componente ExplosionDebris. Deixe vazio para não ter esse efeito.")]
+    [SerializeField] private GameObject explosionDebrisPrefab;
 
-    // Guarda apenas o valor de dano (via NPC_Stats.damage). Fica sempre desabilitado:
-    // nunca queremos que a lógica própria de NPC_Stats (Update, TryTakeHitFrom recebendo dano,
-    // etc.) rode nele, já que o rojão não tem NPC_Controller nem vida própria administrada
-    // do mesmo jeito que uma tropa normal.
+    [Header("Perseguição")]
+    [Tooltip("Raio de detecção: se houver um alvo inimigo dentro desse raio, o foguete muda gradualmente sua trajetória em direção a ele, em vez de manter a rota reta original. Mesma lógica de detecção do NPC_Controller.")]
+    [SerializeField] private float detectionRadius = 5f;
+    [Tooltip("Intervalo, em segundos, entre buscas por um novo alvo próximo.")]
+    [SerializeField] private float retargetInterval = 0.25f;
+    [Tooltip("Velocidade angular (graus/segundo) com que o foguete vira/inclina sua trajetória em direção ao alvo detectado.")]
+    [SerializeField] private float turnSpeed = 120f;
+
+    private Transform currentTarget;
+    private float retargetTimer = 0f;
+
+    private CharacterController controller; // NOVO: mesma abordagem de movimento do NPC_Controller
+
     private NPC_Stats damageSource;
 
-    private Vector3 previousPosition;
     private bool hasExploded = false;
 
     private void Awake()
     {
-        Rigidbody rb = GetComponent<Rigidbody>();
-        rb.isKinematic = true;
-        rb.useGravity = false;
+        controller = GetComponent<CharacterController>();
+        // NOVO: sem gravidade — o foguete não usa CharacterController pra lidar com queda/
+        // terreno como o NPC_Controller, só reaproveita o Move() pra detectar colisão com
+        // outros colliders no caminho (via OnControllerColliderHit) da mesma forma.
 
         damageSource = GetComponent<NPC_Stats>();
         if (damageSource != null)
         {
-            damageSource.enabled = false; // usado só como "porta-dados" do valor de dano
+            damageSource.enabled = false;
         }
         else
         {
@@ -56,9 +73,6 @@ public class FireworkRocket : MonoBehaviour
 
     private void Start()
     {
-        previousPosition = transform.position;
-
-        // Mesma convenção usada no resto do projeto: aliados vão para a direita, inimigos para a esquerda.
         transform.rotation = Quaternion.LookRotation(isEnemy ? Vector3.left : Vector3.right);
 
         Destroy(gameObject, lifeTime);
@@ -68,49 +82,94 @@ public class FireworkRocket : MonoBehaviour
     {
         if (hasExploded) return;
 
-        Vector3 newPosition = transform.position + transform.forward * speed * Time.deltaTime;
-        Vector3 segment = newPosition - previousPosition;
-        float segmentDistance = segment.magnitude;
-
-        if (segmentDistance > 0.0001f)
+        if (trailPrefab != null)
         {
-            RaycastHit[] hits = Physics.SphereCastAll(previousPosition, castRadius, segment.normalized, segmentDistance);
-
-            RaycastHit? bestHit = null;
-            float bestDist = float.MaxValue;
-
-            foreach (RaycastHit hit in hits)
+            trailSpawnTimer -= Time.deltaTime;
+            if (trailSpawnTimer <= 0f)
             {
-                if (hit.collider.gameObject == gameObject) continue; // ignora a si mesmo
-
-                if (IsValidTarget(hit.collider) && hit.distance < bestDist)
+                trailSpawnTimer = trailSpawnInterval;
+                for (int i = 0; i < trailParticlesPerSpawn; i++)
                 {
-                    bestDist = hit.distance;
-                    bestHit = hit;
+                    Instantiate(trailPrefab, transform.position, transform.rotation);
                 }
-            }
-
-            if (bestHit.HasValue)
-            {
-                Explode(bestHit.Value.point);
-                return;
             }
         }
 
-        transform.position = newPosition;
-        previousPosition = newPosition;
+        // NOVO: procura periodicamente um alvo inimigo próximo (mesma lógica de detecção
+        // do NPC_Controller) e, se houver um, vira gradualmente a trajetória em direção a
+        // ele — o foguete "se inclina" rumo ao alvo em vez de manter a rota reta original.
+        retargetTimer -= Time.deltaTime;
+        if (retargetTimer <= 0f)
+        {
+            retargetTimer = retargetInterval;
+            currentTarget = FindClosestEnemy();
+        }
+
+        if (currentTarget != null)
+        {
+            Vector3 desiredDirection = GetClosestPointOnTarget(currentTarget) - transform.position;
+            if (desiredDirection.sqrMagnitude > 0.0001f)
+            {
+                Quaternion desiredRotation = Quaternion.LookRotation(desiredDirection.normalized);
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, desiredRotation, turnSpeed * Time.deltaTime);
+            }
+        }
+
+        // NOVO: em vez do SphereCastAll manual, usa CharacterController.Move como o
+        // NPC_Controller — a gravidade não entra aqui (motion.y fica 0, o foguete nunca
+        // cai), só a componente pra frente (que já reflete o giro acima). A colisão em si
+        // é resolvida pelo próprio CharacterController e reportada em OnControllerColliderHit.
+        Vector3 motion = transform.forward * speed;
+        controller.Move(motion * Time.deltaTime);
     }
 
     /// <summary>
-    /// Reforço/fallback, igual ao Projectile: caso o SphereCast do Update não capture o contato.
+    /// Mesma lógica de FindClosestEnemy() do NPC_Controller: procura, dentro do raio de
+    /// detecção, o inimigo (NPC ou torre) mais próximo, ignorando aliados.
     /// </summary>
-    private void OnTriggerEnter(Collider other)
+    private Transform FindClosestEnemy()
+    {
+        Collider[] hits = Physics.OverlapSphere(transform.position, detectionRadius);
+
+        Transform closest = null;
+        float closestSqrDist = float.MaxValue;
+
+        foreach (Collider hitCollider in hits)
+        {
+            if (!IsValidTarget(hitCollider)) continue;
+
+            Vector3 closestPoint = hitCollider.bounds.ClosestPoint(transform.position);
+            float sqrDist = (closestPoint - transform.position).sqrMagnitude;
+            if (sqrDist < closestSqrDist)
+            {
+                closestSqrDist = sqrDist;
+                closest = hitCollider.transform;
+            }
+        }
+
+        return closest;
+    }
+
+    /// <summary>
+    /// Ponto do collider do alvo mais próximo deste foguete (igual ao GetClosestPointOnTarget do NPC_Controller).
+    /// </summary>
+    private Vector3 GetClosestPointOnTarget(Transform targetTransform)
+    {
+        Collider targetCollider = targetTransform.GetComponent<Collider>();
+        return targetCollider != null ? targetCollider.bounds.ClosestPoint(transform.position) : targetTransform.position;
+    }
+
+    /// <summary>
+    /// Mesmo padrão do NPC_Controller: o CharacterController reporta aqui qualquer
+    /// collider que encoste nele durante o Move(). Se for um alvo válido, explode ali mesmo.
+    /// </summary>
+    private void OnControllerColliderHit(ControllerColliderHit hit)
     {
         if (hasExploded) return;
 
-        if (IsValidTarget(other))
+        if (IsValidTarget(hit.collider))
         {
-            Explode(transform.position);
+            Explode(hit.point);
         }
     }
 
@@ -139,10 +198,7 @@ public class FireworkRocket : MonoBehaviour
         hasExploded = true;
         transform.position = explosionPoint;
 
-        if (explosionVfxPrefab != null)
-        {
-            Instantiate(explosionVfxPrefab, explosionPoint, Quaternion.identity);
-        }
+        SpawnExplosionDebris(explosionPoint);
 
         if (damageSource != null)
         {
@@ -158,10 +214,6 @@ public class FireworkRocket : MonoBehaviour
 
                 alreadyHit.Add(targetStats);
 
-                // NOVO: isola cada alvo em try/catch. Se um alvo específico tiver uma
-                // referência quebrada no Inspector (ex: Life Bar não atribuído) e lançar
-                // exceção, isso não deve impedir os OUTROS alvos de tomarem dano, nem
-                // impedir o rojão de se destruir no final deste método.
                 try
                 {
                     targetStats.TryTakeHitFrom(damageSource);
@@ -176,7 +228,28 @@ public class FireworkRocket : MonoBehaviour
         Destroy(gameObject);
     }
 
-    // Ajuda a visualizar o raio de explosão no Scene View ao selecionar o prefab.
+    /// <summary>
+    /// Instancia o estilhaço de explosão (ExplosionDebris) no ponto de impacto do
+    /// foguete — uma leva de instâncias proporcional ao dano (ex: 5 de dano = 5
+    /// prefabs), cada uma se espalhando em uma direção aleatória do espaço (esfera
+    /// completa), crescendo e depois diminuindo de escala.
+    /// </summary>
+    private void SpawnExplosionDebris(Vector3 position)
+    {
+        if (explosionDebrisPrefab == null || damageSource == null) return;
+
+        int debrisCount = 7;
+
+        for (int i = 0; i < debrisCount; i++)
+        {
+            GameObject effectObj = Instantiate(explosionDebrisPrefab, position, Quaternion.identity);
+            ExplosionDebris effect = effectObj.GetComponent<ExplosionDebris>();
+            if (effect != null)
+            {
+                effect.Launch();
+            }
+        }
+    }
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = new Color(1f, 0.5f, 0f, 0.4f);

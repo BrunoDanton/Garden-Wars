@@ -114,7 +114,7 @@ public class NPC_Controller : MonoBehaviour
 
         spawnPosition = transform.position;
 
-        Tower_Stats[] towers = FindObjectsOfType<Tower_Stats>();
+        Tower_Stats[] towers = FindObjectsByType<Tower_Stats>(FindObjectsSortMode.None);
         float closestTowerSqrDist = float.MaxValue;
         foreach (Tower_Stats tower in towers)
         {

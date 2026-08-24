@@ -132,14 +132,15 @@ public abstract class TroopSpawner : MonoBehaviour
 
     private void UpgradeTower()
     {
-        resourceMultiplier *= 2;
-        maxResource *= 1.5f;
+        resourceMultiplier *= 1.25f;
+        maxResource *= 1.25f;
         resource -= tower_Stats.toUpgradeResource;
-        tower_Stats.toUpgradeResource *= 2;
+        tower_Stats.toUpgradeResource *= 1.25f;
         upgradeCooldown = minTimeBetweenUpgrades;
         StartCoroutine(tower_Stats.LerpColor(Color.yellow, 1f));
         level++;
 
         OnTowerUpgraded?.Invoke(minTimeBetweenUpgrades);
+        minTimeBetweenUpgrades += 15;
     }
 }
