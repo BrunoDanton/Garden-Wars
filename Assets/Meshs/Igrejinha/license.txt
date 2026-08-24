@@ -1,0 +1,11 @@
+Model Information:
+* title:	Igreja
+* source:	https://sketchfab.com/3d-models/igreja-63b74332cca84e7c8de04d7a9b519f9f
+* author:	Jéssica Magno (https://sketchfab.com/jessica_magno)
+
+Model License:
+* license type:	CC-BY-NC-ND-4.0 (http://creativecommons.org/licenses/by-nc-nd/4.0/)
+* requirements:	Author must be credited. No commercial use. Modified versions can not be distributed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Igreja" (https://sketchfab.com/3d-models/igreja-63b74332cca84e7c8de04d7a9b519f9f) by Jéssica Magno (https://sketchfab.com/jessica_magno) licensed under CC-BY-NC-ND-4.0 (http://creativecommons.org/licenses/by-nc-nd/4.0/)

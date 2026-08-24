@@ -1,0 +1,11 @@
+Model Information:
+* title:	Pile of tires
+* source:	https://sketchfab.com/3d-models/pile-of-tires-4cd64aab08124d39aa95849535e64152
+* author:	NikolasKapa_19 (https://sketchfab.com/NikolasKapa_19)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Pile of tires" (https://sketchfab.com/3d-models/pile-of-tires-4cd64aab08124d39aa95849535e64152) by NikolasKapa_19 (https://sketchfab.com/NikolasKapa_19) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
