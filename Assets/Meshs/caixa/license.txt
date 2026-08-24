@@ -1,0 +1,11 @@
+Model Information:
+* title:	Caixa D'água (Water Tank)
+* source:	https://sketchfab.com/3d-models/caixa-dagua-water-tank-5de7a7b4a8644e2abf5565bde2c54ccf
+* author:	Marcos Silva (https://sketchfab.com/marcosramone25)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Caixa D'água (Water Tank)" (https://sketchfab.com/3d-models/caixa-dagua-water-tank-5de7a7b4a8644e2abf5565bde2c54ccf) by Marcos Silva (https://sketchfab.com/marcosramone25) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

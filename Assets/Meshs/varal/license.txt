@@ -1,0 +1,11 @@
+Model Information:
+* title:	Clothesline
+* source:	https://sketchfab.com/3d-models/clothesline-743f5c859f0a4efea50de092323c6b33
+* author:	Daniela Huerfano (https://sketchfab.com/c.daniela.h.c)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Clothesline" (https://sketchfab.com/3d-models/clothesline-743f5c859f0a4efea50de092323c6b33) by Daniela Huerfano (https://sketchfab.com/c.daniela.h.c) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

@@ -1,0 +1,43 @@
+fileFormatVersion: 2
+guid: 13d8deaf9d307274fa128bb2fde6d0d4
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 11500000, guid: 715df9372183c47e389bb6e19fbc3b52, type: 3}
+  editorImportSettings:
+    generateSecondaryUVSet: 0
+  importSettings:
+    nodeNameMethod: 1
+    animationMethod: 2
+    generateMipMaps: 1
+    texturesReadable: 0
+    defaultMinFilterMode: 9729
+    defaultMagFilterMode: 9729
+    anisotropicFilterLevel: 1
+  instantiationSettings:
+    mask: -1
+    layer: 0
+    skinUpdateWhenOffscreen: 1
+    lightIntensityFactor: 1
+    sceneObjectCreation: 2
+  assetDependencies:
+  - type: 0
+    originalUri: Assets\Meshs\garrafa_plastica\scene.bin
+    assetPath: Assets\Meshs\garrafa_plastica\scene.bin
+  - type: 1
+    originalUri: Assets\Meshs\garrafa_plastica\textures\Mat_Bottle1_diffuse.png
+    assetPath: Assets\Meshs\garrafa_plastica\textures\Mat_Bottle1_diffuse.png
+  - type: 1
+    originalUri: Assets\Meshs\garrafa_plastica\textures\Mat_Bottle1_specularGlossiness.png
+    assetPath: Assets\Meshs\garrafa_plastica\textures\Mat_Bottle1_specularGlossiness.png
+  - type: 1
+    originalUri: Assets\Meshs\garrafa_plastica\textures\Mat_Bottle1_normal.png
+    assetPath: Assets\Meshs\garrafa_plastica\textures\Mat_Bottle1_normal.png
+  - type: 1
+    originalUri: Assets\Meshs\garrafa_plastica\textures\Mat_Bottle1_occlusion.png
+    assetPath: Assets\Meshs\garrafa_plastica\textures\Mat_Bottle1_occlusion.png
+  reportItems: []

@@ -1,0 +1,305 @@
+{
+  "accessors": [
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 2330,
+      "max": [
+        32.400001525878906,
+        1.999999761581421,
+        32.400001525878906
+      ],
+      "min": [
+        -32.400001525878906,
+        -1.862645149230957e-07,
+        -32.400001525878906
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 27960,
+      "componentType": 5126,
+      "count": 2330,
+      "max": [
+        0.9807854294776917,
+        1.0,
+        0.9807854294776917
+      ],
+      "min": [
+        -0.9807854294776917,
+        -1.0,
+        -0.9807854294776917
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 2330,
+      "max": [
+        1.0,
+        1.0
+      ],
+      "min": [
+        0.0,
+        0.0
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 0,
+      "componentType": 5125,
+      "count": 4083,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 55920,
+      "componentType": 5126,
+      "count": 460,
+      "max": [
+        39.5,
+        10.0,
+        39.5
+      ],
+      "min": [
+        -39.5,
+        0.0,
+        -39.5
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 61440,
+      "componentType": 5126,
+      "count": 460,
+      "max": [
+        0.9807854294776917,
+        1.0,
+        0.9807853698730469
+      ],
+      "min": [
+        -0.9807854890823364,
+        -1.0,
+        -0.9807853698730469
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 18640,
+      "componentType": 5126,
+      "count": 460,
+      "max": [
+        1.0,
+        1.0
+      ],
+      "min": [
+        0.0,
+        0.01000000536441803
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 0,
+      "byteOffset": 16332,
+      "componentType": 5125,
+      "count": 876,
+      "type": "SCALAR"
+    }
+  ],
+  "asset": {
+    "extras": {
+      "author": "xofyc (https://sketchfab.com/xofycmodeler)",
+      "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+      "source": "https://sketchfab.com/3d-models/low-poly-manhole-cover-418a714374a04a7ab0057b0df58d97ad",
+      "title": "Low Poly Manhole Cover"
+    },
+    "generator": "Sketchfab-0.6.0",
+    "version": "2.0"
+  },
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 19836,
+      "name": "floatBufferViews",
+      "target": 34963
+    },
+    {
+      "buffer": 0,
+      "byteLength": 22320,
+      "byteOffset": 19836,
+      "byteStride": 8,
+      "name": "floatBufferViews",
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 66960,
+      "byteOffset": 42156,
+      "byteStride": 12,
+      "name": "floatBufferViews",
+      "target": 34962
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 109116,
+      "uri": "scene.bin"
+    }
+  ],
+  "materials": [
+    {
+      "doubleSided": true,
+      "name": "M_Manhole_CastIron",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.0343398,
+          0.0331048,
+          0.028426,
+          1.0
+        ],
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.9944730988896938
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "ManholeCover_M_Manhole_CastIron_0",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 1,
+            "POSITION": 0,
+            "TEXCOORD_0": 2
+          },
+          "indices": 3,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    },
+    {
+      "name": "ManholeFrame_M_Manhole_CastIron_0",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 5,
+            "POSITION": 4,
+            "TEXCOORD_0": 6
+          },
+          "indices": 7,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "children": [
+        1
+      ],
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        2.220446049250313e-16,
+        -1.0,
+        0.0,
+        0.0,
+        1.0,
+        2.220446049250313e-16,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "Sketchfab_model"
+    },
+    {
+      "children": [
+        2
+      ],
+      "matrix": [
+        0.009999999776482582,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.009999999776482582,
+        0.0,
+        0.0,
+        -0.009999999776482582,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "eb10c3931224427386b4b5128c9be9bf.fbx"
+    },
+    {
+      "children": [
+        3,
+        5
+      ],
+      "name": "RootNode"
+    },
+    {
+      "children": [
+        4
+      ],
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        -4.1909510173354647e-07,
+        8.000000953674316,
+        -1.86264500712241e-07,
+        1.0
+      ],
+      "name": "ManholeCover"
+    },
+    {
+      "mesh": 0,
+      "name": "ManholeCover_M_Manhole_CastIron_0"
+    },
+    {
+      "children": [
+        6
+      ],
+      "name": "ManholeFrame"
+    },
+    {
+      "mesh": 1,
+      "name": "ManholeFrame_M_Manhole_CastIron_0"
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "Sketchfab_Scene",
+      "nodes": [
+        0
+      ]
+    }
+  ]
+}

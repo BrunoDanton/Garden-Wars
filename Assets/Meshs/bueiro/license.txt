@@ -1,0 +1,11 @@
+Model Information:
+* title:	Low Poly Manhole Cover
+* source:	https://sketchfab.com/3d-models/low-poly-manhole-cover-418a714374a04a7ab0057b0df58d97ad
+* author:	xofyc (https://sketchfab.com/xofycmodeler)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Low Poly Manhole Cover" (https://sketchfab.com/3d-models/low-poly-manhole-cover-418a714374a04a7ab0057b0df58d97ad) by xofyc (https://sketchfab.com/xofycmodeler) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

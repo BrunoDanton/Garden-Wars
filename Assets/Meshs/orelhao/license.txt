@@ -1,0 +1,11 @@
+Model Information:
+* title:	Orelhao
+* source:	https://sketchfab.com/3d-models/orelhao-78a74f8c4fd940dfb8cf825c5f57d05d
+* author:	herdyanasofia (https://sketchfab.com/herdyanasofia)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Orelhao" (https://sketchfab.com/3d-models/orelhao-78a74f8c4fd940dfb8cf825c5f57d05d) by herdyanasofia (https://sketchfab.com/herdyanasofia) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

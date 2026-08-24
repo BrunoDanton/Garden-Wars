@@ -1,0 +1,495 @@
+{
+  "accessors": [
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 1084,
+      "max": [
+        60.053688049316406,
+        62.82080841064453,
+        20.43389892578125
+      ],
+      "min": [
+        -66.29813385009766,
+        -59.66809844970703,
+        -6.554999828338623
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 13008,
+      "componentType": 5126,
+      "count": 1084,
+      "max": [
+        0.999977171421051,
+        0.9999986290931702,
+        0.9999991655349731
+      ],
+      "min": [
+        -0.9999903440475464,
+        -0.9999812245368958,
+        -0.9998811483383179
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 1084,
+      "max": [
+        0.9713032245635986,
+        0.9832083582878113
+      ],
+      "min": [
+        0.0156266912817955,
+        0.02251492813229561
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 0,
+      "componentType": 5125,
+      "count": 5040,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 26016,
+      "componentType": 5126,
+      "count": 1626,
+      "max": [
+        87.1008071899414,
+        62.82080841064453,
+        47.34828567504883
+      ],
+      "min": [
+        -114.08885955810547,
+        -122.6181640625,
+        -7.544181823730469
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 45528,
+      "componentType": 5126,
+      "count": 1626,
+      "max": [
+        0.999977171421051,
+        0.9999986290931702,
+        0.9999991655349731
+      ],
+      "min": [
+        -0.9999903440475464,
+        -0.9999812245368958,
+        -0.9998811483383179
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 8672,
+      "componentType": 5126,
+      "count": 1626,
+      "max": [
+        0.9713032245635986,
+        0.9832083582878113
+      ],
+      "min": [
+        0.0156266912817955,
+        0.02251492813229561
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 0,
+      "byteOffset": 20160,
+      "componentType": 5125,
+      "count": 7560,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 65040,
+      "componentType": 5126,
+      "count": 2710,
+      "max": [
+        87.80078887939453,
+        63.52080535888672,
+        48.04817199707031
+      ],
+      "min": [
+        -114.77654266357422,
+        -123.30850982666016,
+        -8.24396800994873
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 97560,
+      "componentType": 5126,
+      "count": 2710,
+      "max": [
+        0.9999903440475464,
+        0.9999812245368958,
+        0.9998811483383179
+      ],
+      "min": [
+        -0.999977171421051,
+        -0.9999986290931702,
+        -0.9999991655349731
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 21680,
+      "componentType": 5126,
+      "count": 2710,
+      "max": [
+        0.9713032245635986,
+        0.9832083582878113
+      ],
+      "min": [
+        0.0156266912817955,
+        0.02251492813229561
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 0,
+      "byteOffset": 50400,
+      "componentType": 5125,
+      "count": 12600,
+      "type": "SCALAR"
+    }
+  ],
+  "asset": {
+    "extras": {
+      "author": "NikolasKapa_19 (https://sketchfab.com/NikolasKapa_19)",
+      "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+      "source": "https://sketchfab.com/3d-models/pile-of-tires-4cd64aab08124d39aa95849535e64152",
+      "title": "Pile of tires"
+    },
+    "generator": "Sketchfab-12.67.0",
+    "version": "2.0"
+  },
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 100800,
+      "name": "floatBufferViews",
+      "target": 34963
+    },
+    {
+      "buffer": 0,
+      "byteLength": 43360,
+      "byteOffset": 100800,
+      "byteStride": 8,
+      "name": "floatBufferViews",
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 130080,
+      "byteOffset": 144160,
+      "byteStride": 12,
+      "name": "floatBufferViews",
+      "target": 34962
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 274240,
+      "uri": "scene.bin"
+    }
+  ],
+  "extensionsUsed": [
+    "KHR_materials_unlit"
+  ],
+  "images": [
+    {
+      "uri": "textures/Material_42_baseColor.png"
+    }
+  ],
+  "materials": [
+    {
+      "doubleSided": true,
+      "extensions": {
+        "KHR_materials_unlit": {}
+      },
+      "name": "Material_42",
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0
+        },
+        "metallicFactor": 0.0
+      }
+    },
+    {
+      "extensions": {
+        "KHR_materials_unlit": {}
+      },
+      "name": "Material_246",
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0
+        },
+        "metallicFactor": 0.0
+      }
+    },
+    {
+      "extensions": {
+        "KHR_materials_unlit": {}
+      },
+      "name": "Material_73",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "metallicFactor": 0.0
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "Neumaticos001_Material #42_0",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 1,
+            "POSITION": 0,
+            "TEXCOORD_0": 2
+          },
+          "indices": 3,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    },
+    {
+      "name": "Neumaticos001_Material #246_0",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 5,
+            "POSITION": 4,
+            "TEXCOORD_0": 6
+          },
+          "indices": 7,
+          "material": 1,
+          "mode": 4
+        }
+      ]
+    },
+    {
+      "name": "Neumaticos002_Material #73_0",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 9,
+            "POSITION": 8,
+            "TEXCOORD_0": 10
+          },
+          "indices": 11,
+          "material": 2,
+          "mode": 4
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "children": [
+        1
+      ],
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        2.220446049250313e-16,
+        -1.0,
+        0.0,
+        0.0,
+        1.0,
+        2.220446049250313e-16,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "Sketchfab_model"
+    },
+    {
+      "children": [
+        2
+      ],
+      "matrix": [
+        0.02539999969303608,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.02539999969303608,
+        0.0,
+        0.0,
+        -0.02539999969303608,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "c44f9f87482f44a3a263b04562433de5.fbx"
+    },
+    {
+      "children": [
+        3,
+        7
+      ],
+      "name": "RootNode"
+    },
+    {
+      "children": [
+        4
+      ],
+      "matrix": [
+        0.05741700157523145,
+        -3.4223199829597144e-09,
+        -1.8997692213583276e-25,
+        0.0,
+        7.012024543906781e-17,
+        1.1764225068915394e-09,
+        -0.05741700157523154,
+        0.0,
+        1.1390507204112032e-08,
+        0.19110099971294364,
+        3.915486893846465e-09,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "Neumaticos001"
+    },
+    {
+      "children": [
+        5,
+        6
+      ],
+      "matrix": [
+        1.0,
+        0.0,
+        -0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        1.9073486328125e-06,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "Object_4"
+    },
+    {
+      "mesh": 0,
+      "name": "Neumaticos001_Material #42_0"
+    },
+    {
+      "mesh": 1,
+      "name": "Neumaticos001_Material #246_0"
+    },
+    {
+      "children": [
+        8
+      ],
+      "matrix": [
+        0.05741700157523145,
+        -3.4223199829597144e-09,
+        -1.8997692213583276e-25,
+        0.0,
+        7.012024543906781e-17,
+        1.1764225068915394e-09,
+        -0.05741700157523154,
+        0.0,
+        1.1390507204112032e-08,
+        0.19110099971294364,
+        3.915486893846465e-09,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "Neumaticos002"
+    },
+    {
+      "children": [
+        9
+      ],
+      "matrix": [
+        1.0,
+        0.0,
+        -0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        1.9073486328125e-06,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "Object_8"
+    },
+    {
+      "mesh": 2,
+      "name": "Neumaticos002_Material #73_0"
+    }
+  ],
+  "samplers": [
+    {
+      "magFilter": 9729,
+      "minFilter": 9987,
+      "wrapS": 10497,
+      "wrapT": 10497
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "Sketchfab_Scene",
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "sampler": 0,
+      "source": 0
+    }
+  ]
+}

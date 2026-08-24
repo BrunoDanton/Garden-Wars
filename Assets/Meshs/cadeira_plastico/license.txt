@@ -1,0 +1,11 @@
+Model Information:
+* title:	Plastic Chair (Cadeira de Plástico)
+* source:	https://sketchfab.com/3d-models/plastic-chair-cadeira-de-plastico-a75609feb3d24d58a1581b84750250c1
+* author:	xelat (https://sketchfab.com/xelat)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Plastic Chair (Cadeira de Plástico)" (https://sketchfab.com/3d-models/plastic-chair-cadeira-de-plastico-a75609feb3d24d58a1581b84750250c1) by xelat (https://sketchfab.com/xelat) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

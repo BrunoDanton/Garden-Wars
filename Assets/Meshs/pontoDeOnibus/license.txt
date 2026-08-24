@@ -1,0 +1,11 @@
+Model Information:
+* title:	BRAZILIAN BUS STOP
+* source:	https://sketchfab.com/3d-models/brazilian-bus-stop-a66713c8c5a249059d8dac20465ed0fd
+* author:	ijiklvn (https://sketchfab.com/kelvin-carvalho)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "BRAZILIAN BUS STOP" (https://sketchfab.com/3d-models/brazilian-bus-stop-a66713c8c5a249059d8dac20465ed0fd) by ijiklvn (https://sketchfab.com/kelvin-carvalho) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

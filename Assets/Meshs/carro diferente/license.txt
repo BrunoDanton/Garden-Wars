@@ -1,0 +1,11 @@
+Model Information:
+* title:	Monza SLE 84 Low Poly
+* source:	https://sketchfab.com/3d-models/monza-sle-84-low-poly-c3550105f903498eb005510e661f97ef
+* author:	lael.eugenio (https://sketchfab.com/lael.eugenio)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Monza SLE 84 Low Poly" (https://sketchfab.com/3d-models/monza-sle-84-low-poly-c3550105f903498eb005510e661f97ef) by lael.eugenio (https://sketchfab.com/lael.eugenio) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

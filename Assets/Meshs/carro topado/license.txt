@@ -1,0 +1,11 @@
+Model Information:
+* title:	Mach 5
+* source:	https://sketchfab.com/3d-models/mach-5-068ace7a8d294a7abcdf79930a43a0c8
+* author:	JFelipe_FP (https://sketchfab.com/jfelipefp32)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Mach 5" (https://sketchfab.com/3d-models/mach-5-068ace7a8d294a7abcdf79930a43a0c8) by JFelipe_FP (https://sketchfab.com/jfelipefp32) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
